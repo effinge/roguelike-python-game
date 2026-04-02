@@ -5,4 +5,7 @@ class Entity:
         self.hp = hp
         self.damage = damage
         self.symbol = symbol
-    
+    def move(self,dx,dy):
+        new_x = self.x + dx
+        new_y = self.y + dy 
+        
