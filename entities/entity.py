@@ -13,4 +13,7 @@ class Entity:
     def take_damage(self, amount: int):
         self.hp -= amount
         if self.hp < 0:
-            self.hp = 0    
+            self.hp = 0  
+
+    def is_alive(self) -> bool:
+        return self.hp > 0 
