@@ -17,3 +17,9 @@ class Entity:
 
     def is_alive(self) -> bool:
         return self.hp > 0 
+    
+    def attack(self, target) -> int:
+        if target and target.is_alive():
+            target.take_damage(self.damage)
+            return self.damage
+        return 0
