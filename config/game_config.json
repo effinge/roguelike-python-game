@@ -1,0 +1,12 @@
+{
+    "map": {
+        "width": 20,
+        "height": 10
+    },
+    "player": {
+        "hp": 100,
+        "damage": 3,
+        "start_x": 1,
+        "start_y": 2
+    }
+}
