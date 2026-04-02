@@ -5,7 +5,12 @@ class Entity:
         self.hp = hp
         self.damage = damage
         self.symbol = symbol
+
     def move(self,dx,dy):
         new_x = self.x + dx
-        new_y = self.y + dy 
-        
+        new_y = self.y + dy
+
+    def take_damage(self, amount: int):
+        self.hp -= amount
+        if self.hp < 0:
+            self.hp = 0    
