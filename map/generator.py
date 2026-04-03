@@ -65,3 +65,11 @@ class MapGenerator:
 
             self._create_horizontal_corridor(game_map, start_x, end_x, start_y)
             self._create_vertical_corridor(game_map, start_y, end_y, end_x)
+        
+    def find_free_cell_in_room(self, game_map: GameMap, x, y, w, h) -> tuple | None:
+        for _ in range(100): # максимум попыток поиска
+            fx = random.randint(x, x + w - 1)
+            fy = random.randint(y, y + h - 1)
+            if game_map.is_walkable(fx, fy) and game_map.objects[fx][fy] is None:
+                return (fx, fy)
+        return None
