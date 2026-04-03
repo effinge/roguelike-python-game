@@ -18,4 +18,6 @@ class GameMap:
         if 0 <= x < self.width and 0 <= y < self.height:
             self.objects[x][y] = symbol
         
-    
+    def remove_object(self, x, y) -> None:
+        if 0 <= x < self.width and 0 <= y < self.height:
+            self.objects[x][y] = None
