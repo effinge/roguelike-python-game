@@ -48,4 +48,15 @@ class MapGenerator:
         for x in range(min(x1, x2), max(x1, x2) + 1):
     def create_vertical_corridor(self, game_map: GameMap, y1, y2, x) -> None:
         for y in range(min(y1, y2), max(y1, y2) + 1):
-            game_map.set_floor(x, y)
+            game_map.set_floor(x, y)    def create_corridors(self, game_map: GameMap, rooms: list) -> None:
+        for i in range(len(rooms) - 1):
+            
+            x1, y1, w1, h1 = rooms[i]
+            x2, y2, w2, h2 = rooms[i + 1]
+            start_x = x1 + w1 // 2
+            start_y = y1 + h1 // 2
+            end_x = x2 + w2 // 2
+            end_y = y2 + h2 // 2
+
+            self._create_horizontal_corridor(game_map, start_x, end_x, start_y)
+            self._create_vertical_corridor(game_map, start_y, end_y, end_x)
