@@ -3,25 +3,27 @@ import random
 from .game_map import GameMap
 
 class MapGenerator:
-    def __init__(self, config_path):
+    def __init__(self, config_path: str):
 
         with open(config_path, 'r') as f:
             self.config = json.load(f)
         
-        self.width = self.config["map_width"]
-        self.height = self.config["map_height"]
-        self.num_rooms = self.config["num_rooms"]
-        self.room_min_size = self.config["room_min_size"]
-        self.room_max_size = self.config["room_max_size"]
-        self.num_enemies = self.config["num_enemies"]
-        self.num_items = self.config["num_items"]
-    
+        self.width = self.config["map"]["width"]
+        self.height = self.config["map"]["height"]
+
+        gen = self.config.get("generation", {})
+        self.num_rooms = gen.get("num_rooms", 5)
+        self.room_min_size = gen.get("room_min_size", 3)
+        self.room_max_size = gen.get("room_max_size", 6)
+        self.num_enemies = gen.get("num_enemies", 3)
+        self.num_items = gen.get("num_items", 2)
+
     def create_room(self, game_map: GameMap, x, y, w, h) -> None:
         for i in range(x, x + w):
             for j in range(y, y + h):
                 game_map.set_floor(i, j)
 
-    def rectengle_intersect(self, r1: tuple, r2: tuple) -> None:
+    def rectangles_intersect(self, r1: tuple, r2: tuple) -> None:
         x1, y1, w1, h1 = r1
         x2, y2, w2, h2 = r2
         return not(x1 + w1 < x2 or x2 + w2 < x1 or y1 + h1 < y2 or y2 + h2 < y1)
@@ -63,8 +65,8 @@ class MapGenerator:
             end_x = x2 + w2 // 2
             end_y = y2 + h2 // 2
 
-            self._create_horizontal_corridor(game_map, start_x, end_x, start_y)
-            self._create_vertical_corridor(game_map, start_y, end_y, end_x)
+            self.create_horizontal_corridor(game_map, start_x, end_x, start_y)
+            self.create_vertical_corridor(game_map, start_y, end_y, end_x)
         
     def find_free_cell_in_room(self, game_map: GameMap, x, y, w, h) -> tuple | None:
         for _ in range(100): # максимум попыток поиска

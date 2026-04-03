@@ -4,8 +4,8 @@ class GameMap:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.tiles = [['T' for _ in range(height)] for _ in range(width)] #двумерный список клеток
-        self.objects = [['O' for _ in range(height)] for _ in range(width)] #двумерный список объектов
+        self.tiles = [['#' for _ in range(height)] for _ in range(width)] #двумерный список клеток
+        self.objects = [[None for _ in range(height)] for _ in range(width)] #двумерный список объектов
 
     def set_floor(self, x, y) -> None:
         if 0 <= x < self.width and 0 <= y < self.height:
@@ -27,8 +27,8 @@ class GameMap:
     def generate_empty_map(self) -> None:
         for x in range(self.width):
             for y in range(self.height):
-                self.tiles[x][y] = 'T'
-                self.objects[x][y] = 'O'
+                self.tiles[x][y] = '#'
+                self.objects[x][y] = None
     
     def get_random_free_cell(self) -> tuple | None:
         free_cells = [(x, y) for x in range(self.width) for y in range(self.height)
