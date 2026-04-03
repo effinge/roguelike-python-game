@@ -74,7 +74,7 @@ class MapGenerator:
                 return (fx, fy)
         return None
     
-        def _place_objects(self, game_map: GameMap, rooms: list) -> None:
+    def _place_objects(self, game_map: GameMap, rooms: list) -> None:
         # Игрок – в первой комнате
         x1, y1, w1, h1 = rooms[0]
         player_pos = self.find_free_cell_in_room(game_map, x1, y1, w1, h1)
