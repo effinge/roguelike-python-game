@@ -16,6 +16,11 @@ class MapGenerator:
         self.num_enemies = self.config["num_enemies"]
         self.num_items = self.config["num_items"]
     
+    def create_room(self, game_map: GameMap, x, y, w, h) -> None:
+        for i in range(x, x + w):
+            for j in range(y, y + h):
+                game_map.set_floor(i, j)
+
     def generate_rooms(self, game_map: GameMap) -> list:
         rooms = []
         max_attempts = 1000
@@ -31,6 +36,6 @@ class MapGenerator:
                 # Проверка пересечения с существующими комнатами
                 if not any(self._rectangles_intersect(new_rect, r) for r in rooms):
                     rooms.append(new_rect)
-                    self._create_room(game_map, x, y, w, h)
+                    self.create_room(game_map, x, y, w, h)
                     break
         return rooms
