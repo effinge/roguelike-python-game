@@ -39,16 +39,21 @@ class MapGenerator:
 
                 new_rect = (x, y, w, h)
                 # Проверка пересечения с существующими комнатами
-                if not any(self._rectangles_intersect(new_rect, r) for r in rooms):
+                if not any(self.rectangles_intersect(new_rect, r) for r in rooms):
                     rooms.append(new_rect)
                     self.create_room(game_map, x, y, w, h)
                     break
-        return rooms    
+        return rooms
+    
     def create_horizontal_corridor(self, game_map: GameMap, x1, x2, y) -> None:
         for x in range(min(x1, x2), max(x1, x2) + 1):
+            game_map.set_floor(x, y)
+        
     def create_vertical_corridor(self, game_map: GameMap, y1, y2, x) -> None:
         for y in range(min(y1, y2), max(y1, y2) + 1):
-            game_map.set_floor(x, y)    def create_corridors(self, game_map: GameMap, rooms: list) -> None:
+            game_map.set_floor(x, y)
+
+    def create_corridors(self, game_map: GameMap, rooms: list) -> None:
         for i in range(len(rooms) - 1):
             
             x1, y1, w1, h1 = rooms[i]
