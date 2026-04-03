@@ -43,4 +43,7 @@ class MapGenerator:
                     rooms.append(new_rect)
                     self.create_room(game_map, x, y, w, h)
                     break
-        return rooms
+        return rooms    
+    def create_horizontal_corridor(self, game_map: GameMap, x1, x2, y) -> None:
+        for x in range(min(x1, x2), max(x1, x2) + 1):
+            game_map.set_floor(x, y)
