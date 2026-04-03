@@ -97,7 +97,9 @@ class MapGenerator:
         for _ in range(self.num_items):
             pos = game_map.get_random_free_cell()
             if pos:
-                game_map.place_object(*pos, 'I')    def generate(self) -> GameMap:
+                game_map.place_object(*pos, 'I')
+    
+    def generate(self) -> GameMap:
         game_map = GameMap(self.width, self.height)
         game_map.generate_empty_map()
 
