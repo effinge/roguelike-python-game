@@ -74,4 +74,27 @@ class MapGenerator:
                 return (fx, fy)
         return None
     
-    
+        def _place_objects(self, game_map: GameMap, rooms: list) -> None:
+        # Игрок – в первой комнате
+        x1, y1, w1, h1 = rooms[0]
+        player_pos = self.find_free_cell_in_room(game_map, x1, y1, w1, h1)
+        if player_pos:
+            game_map.place_object(*player_pos, '@')
+
+        # Выход – в последней комнате
+        x_last, y_last, w_last, h_last = rooms[-1]
+        exit_pos = self.find_free_cell_in_room(game_map, x_last, y_last, w_last, h_last)
+        if exit_pos:
+            game_map.place_object(*exit_pos, '>')
+
+        # Враги (символ 'E')
+        for _ in range(self.num_enemies):
+            pos = game_map.get_random_free_cell()
+            if pos:
+                game_map.place_object(*pos, 'E')
+
+        # Предметы (символ 'I')
+        for _ in range(self.num_items):
+            pos = game_map.get_random_free_cell()
+            if pos:
+                game_map.place_object(*pos, 'I')
