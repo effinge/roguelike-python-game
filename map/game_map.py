@@ -21,3 +21,10 @@ class GameMap:
     def remove_object(self, x, y) -> None:
         if 0 <= x < self.width and 0 <= y < self.height:
             self.objects[x][y] = None
+
+    def generate_empty_map(self) -> None:
+        for x in range(self.width):
+            for y in range(self.height):
+                self.tiles[x][y] = 'T'
+                self.objects[x][y] = 'O'
+                
