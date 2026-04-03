@@ -73,3 +73,5 @@ class MapGenerator:
             if game_map.is_walkable(fx, fy) and game_map.objects[fx][fy] is None:
                 return (fx, fy)
         return None
+    
+    

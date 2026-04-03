@@ -1,3 +1,5 @@
+import random
+
 class GameMap:
     def __init__(self, width, height):
         self.width = width
@@ -27,4 +29,9 @@ class GameMap:
             for y in range(self.height):
                 self.tiles[x][y] = 'T'
                 self.objects[x][y] = 'O'
-                
+    
+    def get_random_free_cell(self) -> tuple | None:
+        free_cells = [(x, y) for x in range(self.width) for y in range(self.height)
+                      if self.is_walkable(x, y) and self.objects[x][y] is None]
+        
+        return random.choice(free_cells) if free_cells else None
