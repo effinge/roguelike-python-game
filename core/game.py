@@ -30,6 +30,28 @@ class Game:
         self.game_map.remove_object(old_x, old_y)
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
     
+    def setup_game(self):
+        generator = MapGenerator("config/game_config.json")
+        self.game_map = generator.generate()
+        
+        player_pos = self.find_object("@")
+        
+        if player_pos is None:
+            player_x = self.config["player"]["start_x"]
+            player_y = self.config["player"]["start_y"]
+        else:
+            player_x,player_y = player_pos
+            self.game_map.remove_object(player_x, player_y)
+        
+        self.player = Player(
+            player_x,
+            player_y,
+            self.config["player"]["hp"],
+            self.config["player"]["damage"],
+            "@"
+        )
+        
+        self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
     
     def run(self):
         print("test load")
