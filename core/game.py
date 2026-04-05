@@ -53,18 +53,18 @@ class Game:
         
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
 
-        def handle_input(self, command):
-            if command == "q":
-                self.is_running = False
-                return
+    def handle_input(self, command):
+        if command == "q":
+            self.is_running = False
+            return
             
-            old_x = self.player.x
-            old_y = self.player.y
+        old_x = self.player.x
+        old_y = self.player.y
             
-            moved = self.player.handle_imput(command,self.game_map)
+        moved = self.player.handle_input(command,self.game_map)
             
-            if moved:
-                self.update_player_on_map(old_x, old_y)
+        if moved:
+            self.update_player_on_map(old_x, old_y)
 
     def run(self):
         while self.is_running:
