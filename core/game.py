@@ -24,6 +24,12 @@ class Game:
             for y in range(self.game_map.height):
                 if self.game_map.objects[x][y] == symbol:
                     return (x,y)
-                
+        return None
+
+    def update_player_on_map(self, old_x, old_y):
+        self.game_map.remove_object(old_x, old_y)
+        self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
+    
+    
     def run(self):
         print("test load")
