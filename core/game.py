@@ -21,6 +21,8 @@ class Game:
         self.is_running = True
         
     def load_config(self):
-        with open("/Users/levkhrenovskiy/roguelike/config/game_config.json", "r") as file:
+        with open("config/game_config.json", "r") as file:
             return json.load(file)
         
+    def run(self):
+        print("test load")
