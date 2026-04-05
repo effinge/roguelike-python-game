@@ -4,6 +4,18 @@ class Player(Entity):
     def __init__(self, x, y, hp, damage, symbol):
         super().__init__(x, y, hp, damage, "@")
     
+    def move(self, dx, dy, game_map):
+        new_x = self.x + dx
+        new_y = self.y + dy
+        
+        if game_map.is_walkable(new_x, new_y):
+            self.x = new_x
+            self.y = new_y
+            return True
+        
+        return False
+        
+    
     def handle_input(self, key: str, game_map) -> bool:
         dx, dy = 0, 0
         k = key.lower()
