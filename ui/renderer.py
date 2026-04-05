@@ -22,6 +22,8 @@ class Renderer:
         print(f"Здоровье: {game.player.hp}")
         print(f"Урон: {game.player.damage}")
         print(f"Координаты: ({game.player.x}, {game.player.y})")
+        enemies_count = sum(column.count("E") for column in game.game_map.objects)
+        print(f"Число врагов: {enemies_count}")
         
     def draw_help(self):
         print()
