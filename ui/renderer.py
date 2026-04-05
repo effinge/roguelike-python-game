@@ -1,6 +1,6 @@
 class Renderer:
     def clear_screen(self):
-        print("\n" * 40)
+        print("\n" * 30)
     
     def draw_map(self, game):
         for y in range(game.game_map.height):
