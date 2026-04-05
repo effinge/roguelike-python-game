@@ -65,6 +65,10 @@ class Game:
             
             if moved:
                 self.update_player_on_map(old_x, old_y)
-    
+
     def run(self):
-        print("test load")
+        while self.is_running:
+            self.renderer.draw(self)
+            command = input("\nДействие: ").strip().lower()
+            self.handle_input(command)
+        print("Игра закончена.")
