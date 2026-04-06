@@ -1,3 +1,4 @@
+# entities/enemy.py
 import random
 from .entity import Entity
 
@@ -25,6 +26,7 @@ class Enemy(Entity):
         self.move(dx, dy, game_map)
 
     def die(self):
-        """Вызывается при смерти врага"""
+        """Враг умирает"""
         print(f"{self.name} погиб!")
-        self.symbol = "%"   # можно оставить труп на карте
+        self.symbol = "%"        # можно оставить труп на карте
+        # self.hp = 0  # уже обрабатывается в take_damage
