@@ -18,3 +18,8 @@ class Enemy(Entity):
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         dx, dy = random.choice(directions)
         self.move(dx, dy, game_map)
+    
+        def die(self):
+            print(f"{self.name} погиб!")
+            self.symbol = "%"   # можно оставить труп на карте как "%"
+            # или self.hp = 0 уже есть
