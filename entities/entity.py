@@ -26,6 +26,10 @@ class Entity:
         if self.hp < 0:
             self.hp = 0
 
+    def is_alive(self) -> bool:
+        """Проверяет, живо ли существо"""
+        return self.hp > 0
+
     def is_dead(self) -> bool:
         """Проверяет, мертво ли существо"""
         return self.hp <= 0
