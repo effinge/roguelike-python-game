@@ -1,4 +1,3 @@
-# entities/enemy.py
 import random
 from .entity import Entity
 
@@ -14,7 +13,7 @@ class Enemy(Entity):
         if not self.is_alive():
             return
 
-        # Если игрок рядом — атакуем
+        # Атака, если игрок рядом
         if abs(self.x - player.x) <= 1 and abs(self.y - player.y) <= 1:
             damage = self.attack(player)
             print(f"{self.name} атакует вас и наносит {damage} урона!")
@@ -25,8 +24,11 @@ class Enemy(Entity):
         dx, dy = random.choice(directions)
         self.move(dx, dy, game_map)
 
-    def die(self):
-        """Враг умирает"""
+    def die(self, game_map=None):
+        """Враг умирает + удаляется с карты"""
         print(f"{self.name} погиб!")
-        self.symbol = "%"        # можно оставить труп на карте
-        # self.hp = 0  # уже обрабатывается в take_damage
+        self.symbol = "%"                    # можно оставить труп
+
+        if game_map:
+            self.remove_from_map(game_map)
+            
