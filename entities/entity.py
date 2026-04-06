@@ -3,7 +3,7 @@ class Entity:
         self.x = x
         self.y = y
         self.hp = hp
-        self.max_hp = hp          
+        self.max_hp = hp
         self.damage = damage
         self.symbol = symbol
 

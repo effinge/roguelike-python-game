@@ -1,7 +1,7 @@
 from entities.entity import Entity
 
 class Player(Entity):
-    def __init__(self, x, y, hp, damage, symbol):
+    def __init__(self, x: int, y: int, hp: int = 20, damage: int = 5):
         super().__init__(x, y, hp, damage, "@")
     
     def handle_input(self, key: str, game_map) -> bool:
