@@ -1,4 +1,6 @@
 class Entity:
+    """Базовый класс для всех существ (игрок и враги)"""
+
     def __init__(self, x: int, y: int, hp: int = 20, damage: int = 5, symbol: str = "@"):
         self.x = x
         self.y = y
@@ -19,14 +21,17 @@ class Entity:
         return False
 
     def take_damage(self, amount: int):
+        """Получить урон"""
         self.hp -= amount
         if self.hp < 0:
             self.hp = 0
 
     def is_alive(self) -> bool:
+        """Живо ли существо"""
         return self.hp > 0
 
     def attack(self, target) -> int:
+        """Атаковать цель"""
         if target and target.is_alive():
             target.take_damage(self.damage)
             return self.damage
