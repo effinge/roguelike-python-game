@@ -35,3 +35,8 @@ class GameMap:
                       if self.is_walkable(x, y) and self.objects[x][y] is None]
         
         return random.choice(free_cells) if free_cells else None
+    
+    def get_object(self, x, y):
+        if 0 <= x < self.width and 0 <= y < self.height:
+            return self.objects[x][y]
+        return None
