@@ -21,4 +21,3 @@ class Player(Entity):
 
         # Пытаемся двигаться
         return self.move(dx, dy, game_map)
-    

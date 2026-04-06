@@ -6,9 +6,15 @@ class Entity:
         self.damage = damage
         self.symbol = symbol
 
-    def move(self,dx,dy):
+    def move(self, dx: int, dy: int, game_map) -> bool:
         new_x = self.x + dx
         new_y = self.y + dy
+
+        if game_map.is_walkable(new_x, new_y):
+            self.x = new_x
+            self.y = new_y
+            return True
+        return False
 
     def take_damage(self, amount: int):
         self.hp -= amount
