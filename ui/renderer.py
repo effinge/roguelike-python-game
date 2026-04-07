@@ -24,7 +24,19 @@ class Renderer:
         print(f"Координаты: ({game.player.x}, {game.player.y})")
         enemies_count = sum(column.count("E") for column in game.game_map.objects)
         print(f"Число врагов: {enemies_count}")
-        
+
+    def draw_event_log(self, game):
+        print()
+        print("Недавнее:")
+        messages = game.event_log.get_messages()
+
+        if not messages:
+            print("_")
+            return
+
+        for event in messages:
+            print(f"- {event}")
+
     def draw_help(self):
         print()
         print("Управление:")
@@ -38,4 +50,5 @@ class Renderer:
         self.clear_screen()
         self.draw_map(game)
         self.draw_status(game)
+        self.draw_event_log(game)
         self.draw_help()
