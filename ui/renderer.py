@@ -22,12 +22,12 @@ class Renderer:
         print(f"Здоровье: {game.player.hp}")
         print(f"Урон: {game.player.damage}")
         print(f"Координаты: ({game.player.x}, {game.player.y})")
-        enemies_count = sum(column.count("E") for column in game.game_map.objects)
+        enemies_count = sum(1 for column in game.game_map.objects if column in ["g", "t"])
         print(f"Число врагов: {enemies_count}")
 
     def draw_event_log(self, game):
         print()
-        print("Недавнее:")
+        print("Event log:")
         messages = game.event_log.get_messages()
 
         if not messages:

@@ -13,11 +13,12 @@ class Enemy(Entity):
 
         if abs(self.x - player.x) <= 1 and abs(self.y - player.y) <= 1:
             damage = self.attack(player)
-            return
+            return ("attack", damage)
 
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         dx, dy = random.choice(directions)
-        self.move(dx, dy, game_map)
+        moved = self.move(dx, dy, game_map)
+        return ("move", dx, dy, moved)
 
     def die(self, game_map=None):
         print(f"{self.name} погиб!")

@@ -5,11 +5,8 @@ from entities.player import Player
 from entities.enemy import Enemy
 from ui.renderer import Renderer 
 from core.win_conditions import WinConditions
-<<<<<<< HEAD
 from ui.event_log import EventLog
 
-=======
->>>>>>> main
 class Game:
     def __init__(self):
         self.config = self.load_config()
@@ -17,6 +14,7 @@ class Game:
         self.game_map = None
         self.player = None
         self.enemies = []
+        self.event_log = EventLog()
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
@@ -63,17 +61,21 @@ class Game:
 
             self.game_map.remove_object(enemy.x, enemy.y)
 
+            result = enemy.ai_move(self.game_map, self.player)
 
-            enemy.ai_move(self.game_map, self.player)
+            if isinstance(result, tuple) and result[0] == "attack":
+                damage = result[1]
+                self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
 
             if not enemy.is_alive():
+                self.event_log.add(f'{enemy.name} погиб')
                 enemy.remove_from_map(self.game_map)
                 self.enemies.remove(enemy)
 
             self.game_map.place_object(enemy.x, enemy.y, enemy.symbol)
-            
+
             if not self.player.is_alive():
-                print("Вы погибли!")
+                self.event_log.add('Игрок погиб!')
                 self.is_running = False
                 return
     
@@ -129,7 +131,7 @@ class Game:
                         self.config["enemies"]["goblin"]["hp"],
                         self.config["enemies"]["goblin"]["damage"],
                         "g",
-                        "goblin"
+                        "Гоблин"
                     )
                     goblin_instances.append(gob)
                     self.game_map.place_object(gob.x, gob.y, gob.symbol)
@@ -145,7 +147,7 @@ class Game:
                     self.config["enemies"]["troll"]["hp"],
                     self.config["enemies"]["troll"]["damage"],
                     "t",
-                    "troll"
+                    "Тролль"
                 )
                 troll_instances.append(tr)
                 self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -161,7 +163,7 @@ class Game:
                         self.config["enemies"]["troll"]["hp"],
                         self.config["enemies"]["troll"]["damage"],
                         "t",
-                        "troll"
+                        "Тролль"
                     )
                     troll_instances.append(tr)
                     self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -185,26 +187,18 @@ class Game:
         moved = self.player.handle_input(command,self.game_map)
 
         if moved:
-            stepped_on_exit = self.update_player_on_map(old_x, old_y)
-            if stepped_on_exit:
-                print("Вы выиграли!")
-                self.is_running = False
-                return
-
-            # после хода игрока выполняем ходы всех врагов
             self.run_enemy_turns()
-            # проверить условие победы (например, игрок на выходе) — на всякий случай
+            
             if self.win_conditions.check_win():
-                print("Вы выиграли!")
+                self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
                 self.is_running = False
+            
             self.update_player_on_map(old_x, old_y)
-<<<<<<< HEAD
             self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
         else:
             self.event_log.add(f'Нельзя пройти сюда')
-=======
-
->>>>>>> main
+    
+    
     def run(self):
         while self.is_running:
             self.renderer.draw(self)
