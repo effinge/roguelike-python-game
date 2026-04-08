@@ -2,13 +2,15 @@ import json
 
 from map.generator import MapGenerator
 from entities.player import Player
-
+from entities.enemy import Enemy
+from ui.renderer import Renderer 
 class Game:
     def __init__(self):
         self.config = self.load_config()
         
         self.game_map = None
         self.player = None
+        self.enemies = []
         self.renderer = Renderer()
         self.is_running = True
         
@@ -24,6 +26,14 @@ class Game:
                 if self.game_map.objects[x][y] == symbol:
                     return (x,y)
         return None
+
+    def find_objects(self, symbol):
+        found = []
+        for x in range(self.game_map.width):
+            for y in range(self.game_map.height):
+                if self.game_map.objects[x][y] == symbol:
+                    found.append((x, y))
+        return found
 
     def update_player_on_map(self, old_x, old_y):
         self.game_map.remove_object(old_x, old_y)
@@ -51,6 +61,78 @@ class Game:
         )
         
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
+        
+        
+        # Goblins: take positions from generator if present, otherwise spawn by config count
+        goblin_positions = self.find_objects("g")
+        goblin_instances = []
+        if goblin_positions:
+            for x, y in goblin_positions:
+                self.game_map.remove_object(x, y)
+                gob = Enemy(
+                    x,
+                    y,
+                    self.config["enemies"]["goblin"]["hp"],
+                    self.config["enemies"]["goblin"]["damage"],
+                    "g",
+                    "goblin"
+                )
+                goblin_instances.append(gob)
+                self.game_map.place_object(gob.x, gob.y, gob.symbol)
+        else:
+            count = self.config.get("generation", {}).get("num_goblins", 1)
+            for _ in range(count):
+                pos = self.game_map.get_random_free_cell()
+                if pos:
+                    x, y = pos
+                    gob = Enemy(
+                        x,
+                        y,
+                        self.config["enemies"]["goblin"]["hp"],
+                        self.config["enemies"]["goblin"]["damage"],
+                        "g",
+                        "goblin"
+                    )
+                    goblin_instances.append(gob)
+                    self.game_map.place_object(gob.x, gob.y, gob.symbol)
+
+        troll_positions = self.find_objects("t")
+        troll_instances = []
+        if troll_positions:
+            for tx, ty in troll_positions:
+                self.game_map.remove_object(tx, ty)
+                tr = Enemy(
+                    tx,
+                    ty,
+                    self.config["enemies"]["troll"]["hp"],
+                    self.config["enemies"]["troll"]["damage"],
+                    "t",
+                    "troll"
+                )
+                troll_instances.append(tr)
+                self.game_map.place_object(tr.x, tr.y, tr.symbol)
+        else:
+            count = self.config.get("generation", {}).get("num_trolls", 0)
+            for _ in range(count):
+                pos = self.game_map.get_random_free_cell()
+                if pos:
+                    tx, ty = pos
+                    tr = Enemy(
+                        tx,
+                        ty,
+                        self.config["enemies"]["troll"]["hp"],
+                        self.config["enemies"]["troll"]["damage"],
+                        "t",
+                        "troll"
+                    )
+                    troll_instances.append(tr)
+                    self.game_map.place_object(tr.x, tr.y, tr.symbol)
+
+        self.enemies.extend(goblin_instances)
+        self.enemies.extend(troll_instances)
+        
+        self.g_enemy = goblin_instances[0] if goblin_instances else None
+        self.t_enemy = troll_instances[0] if troll_instances else None
 
     def handle_input(self, command):
         if command == "q":
