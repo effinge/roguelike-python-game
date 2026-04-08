@@ -7,6 +7,8 @@ from ui.renderer import Renderer
 from core.win_conditions import WinConditions
 from ui.event_log import EventLog
 
+from ui.event_log import EventLog
+
 class Game:
     def __init__(self):
         self.config = self.load_config()
@@ -14,6 +16,7 @@ class Game:
         self.game_map = None
         self.player = None
         self.enemies = []
+        self.event_log = EventLog()
         self.event_log = EventLog()
         self.renderer = Renderer()
         self.is_running = True
@@ -40,6 +43,12 @@ class Game:
                     found.append((x, y))
         return found
 
+    def get_enemy_at(self, x, y):
+        for e in self.enemies:
+            if e.x == x and e.y == y and e.is_alive():
+                return e
+        return None
+
     def update_player_on_map(self, old_x, old_y):
         
         tx, ty = self.player.x, self.player.y
@@ -52,7 +61,19 @@ class Game:
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
 
         return target_obj == '>'
-
+    
+    def attack_enemy_at(self, x, y):
+        for enemy in self.enemies:
+            if enemy.x == x and enemy.y == y:
+                damage = self.player.attack(enemy)
+                self.event_log.add(f'Вы атаковали {enemy.name} и нанесли {damage} урона!')
+                if not enemy.is_alive():
+                    self.event_log.add(f'{enemy.name} погиб')
+                    enemy.remove_from_map(self.game_map)
+                    self.enemies.remove(enemy)
+                return True
+        return False
+    
     def run_enemy_turns(self):
         for enemy in list(self.enemies):
             if not enemy.is_alive():
@@ -62,19 +83,26 @@ class Game:
             self.game_map.remove_object(enemy.x, enemy.y)
 
             result = enemy.ai_move(self.game_map, self.player)
+            result = enemy.ai_move(self.game_map, self.player)
 
+            if isinstance(result, tuple) and result[0] == "attack":
+                damage = result[1]
+                self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
             if isinstance(result, tuple) and result[0] == "attack":
                 damage = result[1]
                 self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
 
             if not enemy.is_alive():
                 self.event_log.add(f'{enemy.name} погиб')
+                self.event_log.add(f'{enemy.name} погиб')
                 enemy.remove_from_map(self.game_map)
                 self.enemies.remove(enemy)
 
             self.game_map.place_object(enemy.x, enemy.y, enemy.symbol)
 
+
             if not self.player.is_alive():
+                self.event_log.add('Игрок погиб!')
                 self.event_log.add('Игрок погиб!')
                 self.is_running = False
                 return
@@ -132,6 +160,7 @@ class Game:
                         self.config["enemies"]["goblin"]["damage"],
                         "g",
                         "Гоблин"
+                        "Гоблин"
                     )
                     goblin_instances.append(gob)
                     self.game_map.place_object(gob.x, gob.y, gob.symbol)
@@ -147,6 +176,7 @@ class Game:
                     self.config["enemies"]["troll"]["hp"],
                     self.config["enemies"]["troll"]["damage"],
                     "t",
+                    "Тролль"
                     "Тролль"
                 )
                 troll_instances.append(tr)
@@ -164,6 +194,7 @@ class Game:
                         self.config["enemies"]["troll"]["damage"],
                         "t",
                         "Тролль"
+                        "Тролль"
                     )
                     troll_instances.append(tr)
                     self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -180,18 +211,50 @@ class Game:
         if command == "q":
             self.is_running = False
             return
+    
+        if command == 'f':
             
+            adj_enemies = [e for e in self.enemies if e.is_alive() and abs(e.x - self.player.x) <= 1 and abs(e.y - self.player.y) <= 1]
+            if not adj_enemies:
+                self.event_log.add('Врага рядом нет')
+                self.run_enemy_turns()
+                return
+
+            target = min(adj_enemies, key=lambda e: abs(e.x - self.player.x) + abs(e.y - self.player.y))
+            attacked = self.player.attack_target(target)
+            if attacked:
+                self.event_log.add(f'Вы атакуете {target.name} и наносите {self.player.damage} урона')
+                if not target.is_alive():
+                    self.event_log.add(f'{target.name} погиб')
+                    target.remove_from_map(self.game_map)
+                    
+                    self.enemies.remove(target)
+            else:
+                self.event_log.add('Атака не удалась')
+
+            self.run_enemy_turns()
+            return
+
         old_x = self.player.x
         old_y = self.player.y
-            
-        moved = self.player.handle_input(command,self.game_map)
+
+        moved = self.player.handle_input(command, self.game_map)
 
         if moved:
             self.run_enemy_turns()
             
+            
             if self.win_conditions.check_win():
                 self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
+                self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
                 self.is_running = False
+            
+            self.update_player_on_map(old_x, old_y)
+            self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
+        else:
+            self.event_log.add(f'Нельзя пройти сюда')
+    
+    
             
             self.update_player_on_map(old_x, old_y)
             self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
@@ -202,8 +265,10 @@ class Game:
     def run(self):
         while self.is_running:
             self.renderer.draw(self)
+            
             command = input("\nДействие: ").strip().lower()
             self.handle_input(command)
+            
             if self.win_conditions.check_win():
                 print("Вы выиграли!")
                 self.is_running = False
