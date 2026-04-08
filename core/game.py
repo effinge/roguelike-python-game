@@ -3,8 +3,11 @@ import json
 from map.generator import MapGenerator
 from entities.player import Player
 from ui.renderer import Renderer
+<<<<<<< HEAD
 from ui.event_log import EventLog
 
+=======
+>>>>>>> main
 class Game:
     def __init__(self):
         self.config = self.load_config()
@@ -14,6 +17,8 @@ class Game:
         self.renderer = Renderer()
         self.is_running = True
         self.event_log = EventLog()
+        self.setup_game()
+        
         self.setup_game()
         
     def load_config(self):
@@ -66,9 +71,13 @@ class Game:
             
         if moved:
             self.update_player_on_map(old_x, old_y)
+<<<<<<< HEAD
             self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
         else:
             self.event_log.add(f'Нельзя пройти сюда')
+=======
+
+>>>>>>> main
     def run(self):
         while self.is_running:
             self.renderer.draw(self)

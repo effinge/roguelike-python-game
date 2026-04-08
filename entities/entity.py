@@ -1,21 +1,35 @@
 class Entity:
+
     def __init__(self, x, y, hp, damage, symbol):
         self.x = x
         self.y = y
         self.hp = hp
+        self.max_hp = hp
         self.damage = damage
         self.symbol = symbol
 
-    def move(self,dx,dy):
+    def move(self, dx, dy, game_map):
         new_x = self.x + dx
         new_y = self.y + dy
 
-    def take_damage(self, amount: int):
+        if game_map.is_walkable(new_x, new_y):
+            self.x = new_x
+            self.y = new_y
+            return True
+        return False
+
+    def take_damage(self, amount):
         self.hp -= amount
         if self.hp < 0:
-            self.hp = 0  
-    
-    def attack(self, target) -> int:
+            self.hp = 0
+
+    def is_alive(self):
+        return self.hp > 0
+
+    def is_dead(self):
+        return self.hp <= 0
+
+    def attack(self, target):
         if target and target.is_alive():
             target.take_damage(self.damage)
             return self.damage
