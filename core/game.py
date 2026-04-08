@@ -4,6 +4,7 @@ from map.generator import MapGenerator
 from entities.player import Player
 from entities.enemy import Enemy
 from ui.renderer import Renderer 
+from core.win_conditions import WinConditions
 class Game:
     def __init__(self):
         self.config = self.load_config()
@@ -13,6 +14,7 @@ class Game:
         self.enemies = []
         self.renderer = Renderer()
         self.is_running = True
+        self.win_conditions = WinConditions(self)
         
         self.setup_game()
         
@@ -36,8 +38,17 @@ class Game:
         return found
 
     def update_player_on_map(self, old_x, old_y):
+        
+        tx, ty = self.player.x, self.player.y
+        target_obj = None
+        if 0 <= tx < self.game_map.width and 0 <= ty < self.game_map.height:
+            target_obj = self.game_map.objects[tx][ty]
+
         self.game_map.remove_object(old_x, old_y)
+
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
+
+        return target_obj == '>'
 
     def run_enemy_turns(self):
         for enemy in list(self.enemies):
@@ -149,7 +160,7 @@ class Game:
                     )
                     troll_instances.append(tr)
                     self.game_map.place_object(tr.x, tr.y, tr.symbol)
-
+        
         self.enemies.extend(goblin_instances)
         self.enemies.extend(troll_instances)
         
@@ -167,14 +178,27 @@ class Game:
         old_y = self.player.y
             
         moved = self.player.handle_input(command,self.game_map)
-            
+
         if moved:
-            self.update_player_on_map(old_x, old_y)
+            stepped_on_exit = self.update_player_on_map(old_x, old_y)
+            if stepped_on_exit:
+                print("Вы выиграли!")
+                self.is_running = False
+                return
+
+            # после хода игрока выполняем ходы всех врагов
             self.run_enemy_turns()
+            # проверить условие победы (например, игрок на выходе) — на всякий случай
+            if self.win_conditions.check_win():
+                print("Вы выиграли!")
+                self.is_running = False
 
     def run(self):
         while self.is_running:
             self.renderer.draw(self)
             command = input("\nДействие: ").strip().lower()
             self.handle_input(command)
+            if self.win_conditions.check_win():
+                print("Вы выиграли!")
+                self.is_running = False
         print("Игра закончена.")
