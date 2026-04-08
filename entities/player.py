@@ -3,8 +3,8 @@ from .entity import Entity
 class Player(Entity):
     """Класс игрока"""
 
-    def __init__(self, x: int, y: int, hp: int = 20, damage: int = 5):
-        super().__init__(x, y, hp, damage, "@")
+    def __init__(self, x, y, hp, damage, symbol):
+        super().__init__(x, y, hp, damage, symbol)
     
     def move(self, dx, dy, game_map):
         new_x = self.x + dx
