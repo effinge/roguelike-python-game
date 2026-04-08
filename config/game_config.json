@@ -14,17 +14,19 @@
         "room_min_size": 3,
         "room_max_size": 6,
         "num_trolls": 2,
-        "num_goblins": 5,
+        "num_goblins": 3,
         "num_items": 2
     },
     "enemies": {
         "goblin": {
             "hp": 30,
-            "damage": 5
+            "damage": 5,
+            "symbol": "g"
         },
         "troll": {
             "hp": 50,
-            "damage": 10
+            "damage": 10,
+            "symbol": "t"
         }
     }
 }

@@ -38,6 +38,28 @@ class Game:
     def update_player_on_map(self, old_x, old_y):
         self.game_map.remove_object(old_x, old_y)
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
+
+    def run_enemy_turns(self):
+        for enemy in list(self.enemies):
+            if not enemy.is_alive():
+                enemy.remove_from_map(self.game_map)
+                self.enemies.remove(enemy)
+
+            self.game_map.remove_object(enemy.x, enemy.y)
+
+
+            enemy.ai_move(self.game_map, self.player)
+
+            if not enemy.is_alive():
+                enemy.remove_from_map(self.game_map)
+                self.enemies.remove(enemy)
+
+            self.game_map.place_object(enemy.x, enemy.y, enemy.symbol)
+            
+            if not self.player.is_alive():
+                print("Вы погибли!")
+                self.is_running = False
+                return
     
     def setup_game(self):
         generator = MapGenerator("config/game_config.json")
@@ -63,7 +85,7 @@ class Game:
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
         
         
-        # Goblins: take positions from generator if present, otherwise spawn by config count
+        
         goblin_positions = self.find_objects("g")
         goblin_instances = []
         if goblin_positions:
@@ -133,6 +155,8 @@ class Game:
         
         self.g_enemy = goblin_instances[0] if goblin_instances else None
         self.t_enemy = troll_instances[0] if troll_instances else None
+        
+        
 
     def handle_input(self, command):
         if command == "q":
@@ -146,6 +170,7 @@ class Game:
             
         if moved:
             self.update_player_on_map(old_x, old_y)
+            self.run_enemy_turns()
 
     def run(self):
         while self.is_running:

@@ -3,8 +3,9 @@ from .entity import Entity
 
 class Enemy(Entity):
 
-    def __init__(self, x, y, hp, damage, symbol):
+    def __init__(self, x, y, hp, damage, symbol, name):
         super().__init__(x, y, hp, damage, symbol)
+        self.name = name
 
     def ai_move(self, game_map, player):
         if not self.is_alive():
