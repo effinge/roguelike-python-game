@@ -3,7 +3,6 @@ import json
 from map.generator import MapGenerator
 from entities.player import Player
 from ui.renderer import Renderer
-
 class Game:
     def __init__(self):
         self.config = self.load_config()

@@ -1,7 +1,6 @@
 class Entity:
-    """Базовый класс для всех существ (игрок и враги)"""
 
-    def __init__(self, x: int, y: int, hp: int = 20, damage: int = 5, symbol: str = "@"):
+    def __init__(self, x, y, hp, damage, symbol):
         self.x = x
         self.y = y
         self.hp = hp
@@ -9,8 +8,7 @@ class Entity:
         self.damage = damage
         self.symbol = symbol
 
-    def move(self, dx: int, dy: int, game_map) -> bool:
-        """Перемещение с проверкой стен"""
+    def move(self, dx, dy, game_map):
         new_x = self.x + dx
         new_y = self.y + dy
 
@@ -20,22 +18,18 @@ class Entity:
             return True
         return False
 
-    def take_damage(self, amount: int):
-        """Получить урон"""
+    def take_damage(self, amount):
         self.hp -= amount
         if self.hp < 0:
             self.hp = 0
 
-    def is_alive(self) -> bool:
-        """Проверяет, живо ли существо"""
+    def is_alive(self):
         return self.hp > 0
 
-    def is_dead(self) -> bool:
-        """Проверяет, мертво ли существо"""
+    def is_dead(self):
         return self.hp <= 0
 
-    def attack(self, target) -> int:
-        """Атаковать цель"""
+    def attack(self, target):
         if target and target.is_alive():
             target.take_damage(self.damage)
             return self.damage
