@@ -6,6 +6,7 @@ from entities.enemy import Enemy
 from ui.renderer import Renderer 
 from core.win_conditions import WinConditions
 from ui.event_log import EventLog
+from ui.inventory import Inventory
 
 from ui.event_log import EventLog
 
@@ -18,6 +19,8 @@ class Game:
         self.enemies = []
         self.event_log = EventLog()
         self.event_log = EventLog()
+        self.inventory = Inventory()
+
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
