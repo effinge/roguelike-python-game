@@ -40,6 +40,12 @@ class Game:
                     found.append((x, y))
         return found
 
+    def get_enemy_at(self, x, y):
+        for e in self.enemies:
+            if e.x == x and e.y == y and e.is_alive():
+                return e
+        return None
+
     def update_player_on_map(self, old_x, old_y):
         
         tx, ty = self.player.x, self.player.y
@@ -52,7 +58,19 @@ class Game:
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
 
         return target_obj == '>'
-
+    
+    def attack_enemy_at(self, x, y):
+        for enemy in self.enemies:
+            if enemy.x == x and enemy.y == y:
+                damage = self.player.attack(enemy)
+                self.event_log.add(f'Вы атаковали {enemy.name} и нанесли {damage} урона!')
+                if not enemy.is_alive():
+                    self.event_log.add(f'{enemy.name} погиб')
+                    enemy.remove_from_map(self.game_map)
+                    self.enemies.remove(enemy)
+                return True
+        return False
+    
     def run_enemy_turns(self):
         for enemy in list(self.enemies):
             if not enemy.is_alive():
@@ -180,11 +198,34 @@ class Game:
         if command == "q":
             self.is_running = False
             return
+    
+        if command == 'f':
             
+            adj_enemies = [e for e in self.enemies if e.is_alive() and abs(e.x - self.player.x) <= 1 and abs(e.y - self.player.y) <= 1]
+            if not adj_enemies:
+                self.event_log.add('Врага рядом нет')
+                self.run_enemy_turns()
+                return
+
+            target = min(adj_enemies, key=lambda e: abs(e.x - self.player.x) + abs(e.y - self.player.y))
+            attacked = self.player.attack_target(target)
+            if attacked:
+                self.event_log.add(f'Вы атакуете {target.name} и наносите {self.player.damage} урона')
+                if not target.is_alive():
+                    self.event_log.add(f'{target.name} погиб')
+                    target.remove_from_map(self.game_map)
+                    
+                    self.enemies.remove(target)
+            else:
+                self.event_log.add('Атака не удалась')
+
+            self.run_enemy_turns()
+            return
+
         old_x = self.player.x
         old_y = self.player.y
-            
-        moved = self.player.handle_input(command,self.game_map)
+
+        moved = self.player.handle_input(command, self.game_map)
 
         if moved:
             self.run_enemy_turns()
@@ -202,8 +243,10 @@ class Game:
     def run(self):
         while self.is_running:
             self.renderer.draw(self)
+            
             command = input("\nДействие: ").strip().lower()
             self.handle_input(command)
+            
             if self.win_conditions.check_win():
                 print("Вы выиграли!")
                 self.is_running = False

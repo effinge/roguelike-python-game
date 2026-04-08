@@ -45,6 +45,7 @@ class Renderer:
         print("a - влево")
         print("d - вправо")
         print("q - выход из игры")
+        print("f - атака")
     
     def draw(self, game):
         self.clear_screen()
