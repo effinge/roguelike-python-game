@@ -15,7 +15,8 @@ class MapGenerator:
         self.num_rooms = gen.get("num_rooms", 5)
         self.room_min_size = gen.get("room_min_size", 3)
         self.room_max_size = gen.get("room_max_size", 6)
-        self.num_enemies = gen.get("num_enemies", 3)
+        self.num_goblins = gen.get("num_goblins", 3)
+        self.num_trolls = gen.get("num_trolls", 2)
         self.num_items = gen.get("num_items", 2)
 
     def create_room(self, game_map: GameMap, x, y, w, h) -> None:
@@ -88,12 +89,17 @@ class MapGenerator:
         exit_pos = self.find_free_cell_in_room(game_map, x_last, y_last, w_last, h_last)
         if exit_pos:
             game_map.place_object(*exit_pos, '>')
-
-        # Враги (символ 'E')
-        for _ in range(self.num_enemies):
+        
+        for _ in range(self.num_trolls):
             pos = game_map.get_random_free_cell()
             if pos:
-                game_map.place_object(*pos, 'E')
+                game_map.place_object(*pos, 't')
+        
+        for _ in range(self.num_goblins):
+            pos = game_map.get_random_free_cell()
+            if pos:
+                game_map.place_object(*pos, 'g')
+                
 
         # Предметы (символ 'I')
         for _ in range(self.num_items):

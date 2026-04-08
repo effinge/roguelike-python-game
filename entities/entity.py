@@ -34,3 +34,6 @@ class Entity:
             target.take_damage(self.damage)
             return self.damage
         return 0
+
+    def remove_from_map(self, game_map):
+            game_map.remove_object(self.x, self.y)
