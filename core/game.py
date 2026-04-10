@@ -18,9 +18,7 @@ class Game:
         self.player = None
         self.enemies = []
         self.event_log = EventLog()
-        self.event_log = EventLog()
         self.inventory = Inventory()
-
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
@@ -86,17 +84,12 @@ class Game:
             self.game_map.remove_object(enemy.x, enemy.y)
 
             result = enemy.ai_move(self.game_map, self.player)
-            result = enemy.ai_move(self.game_map, self.player)
 
-            if isinstance(result, tuple) and result[0] == "attack":
-                damage = result[1]
-                self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
             if isinstance(result, tuple) and result[0] == "attack":
                 damage = result[1]
                 self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
 
             if not enemy.is_alive():
-                self.event_log.add(f'{enemy.name} погиб')
                 self.event_log.add(f'{enemy.name} погиб')
                 enemy.remove_from_map(self.game_map)
                 self.enemies.remove(enemy)
@@ -105,7 +98,6 @@ class Game:
 
 
             if not self.player.is_alive():
-                self.event_log.add('Игрок погиб!')
                 self.event_log.add('Игрок погиб!')
                 self.is_running = False
                 return
@@ -248,7 +240,6 @@ class Game:
             
             
             if self.win_conditions.check_win():
-                self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
                 self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
                 self.is_running = False
             
