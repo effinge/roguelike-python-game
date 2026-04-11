@@ -18,24 +18,36 @@ class Renderer:
             print(row)
     
     def draw_status(self, game):
+        enemies_count = sum(
+            column.count("g") + column.count("t")
+            for column in game.game_map.objects
+        )
+
         print()
-        print(f"Здоровье: {game.player.hp}")
-        print(f"Урон: {game.player.damage}")
-        print(f"Координаты: ({game.player.x}, {game.player.y})")
-        enemies_count = sum(1 for column in game.game_map.objects if column in ["g", "t"])
-        print(f"Число врагов: {enemies_count}")
+        print(
+            f"Здоровье: {game.player.hp} | "
+            f"Урон: {game.player.damage} | "
+            f"Координаты: ({game.player.x}, {game.player.y}) | "
+            f"Число врагов: {enemies_count}"
+        )
+
+    def draw_help(self):
+        print()
+        print("Управление: w - вверх | s - вниз | a - влево | d - вправо | f - атака | q - выход")
 
     def draw_event_log(self, game):
         print()
         print("Event log:")
-        messages = game.event_log.get_messages()
 
-        if not messages:
-            print("_")
-            return
+        messages = list(reversed(game.event_log.get_messages()))
+        visible_messages = messages[:3]
 
-        for event in messages:
+        for event in visible_messages:
             print(f"- {event}")
+
+        for _ in range(3 - len(visible_messages)):
+            print()
+
 
     def draw_help(self):
         print()
