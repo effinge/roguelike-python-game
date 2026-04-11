@@ -1,4 +1,7 @@
+from ui.event_log import EventLog
+
 class Entity:
+
 
     def __init__(self, x, y, hp, damage, symbol):
         self.x = x
@@ -7,6 +10,7 @@ class Entity:
         self.max_hp = hp
         self.damage = damage
         self.symbol = symbol
+        self.event_log = EventLog()
 
     def move(self, dx, dy, game_map):
         new_x = self.x + dx

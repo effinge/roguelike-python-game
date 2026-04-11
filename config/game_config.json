@@ -5,7 +5,7 @@
     },
     "player": {
         "hp": 100,
-        "damage": 3,
+        "damage": 15,
         "start_x": 1,
         "start_y": 2
     },
@@ -24,7 +24,7 @@
             "symbol": "g"
         },
         "troll": {
-            "hp": 50,
+            "hp": 30,
             "damage": 10,
             "symbol": "t"
         }
