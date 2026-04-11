@@ -3,7 +3,7 @@ import random
 from .game_map import GameMap
 
 class MapGenerator:
-    def __init__(self, config_path: str):
+    def __init__(self, config_path):
 
         with open(config_path, 'r') as f:
             self.config = json.load(f)
@@ -19,12 +19,12 @@ class MapGenerator:
         self.num_trolls = gen.get("num_trolls", 2)
         self.num_items = gen.get("num_items", 2)
 
-    def create_room(self, game_map: GameMap, x, y, w, h) -> None:
+    def create_room(self, game_map: GameMap, x, y, w, h):
         for i in range(x, x + w):
             for j in range(y, y + h):
                 game_map.set_floor(i, j)
 
-    def rectangles_intersect(self, r1: tuple, r2: tuple) -> None:
+    def rectangles_intersect(self, r1: tuple, r2: tuple):
         x1, y1, w1, h1 = r1
         x2, y2, w2, h2 = r2
         return not(x1 + w1 < x2 or x2 + w2 < x1 or y1 + h1 < y2 or y2 + h2 < y1)
@@ -48,15 +48,15 @@ class MapGenerator:
                     break
         return rooms
     
-    def create_horizontal_corridor(self, game_map: GameMap, x1, x2, y) -> None:
+    def create_horizontal_corridor(self, game_map: GameMap, x1, x2, y):
         for x in range(min(x1, x2), max(x1, x2) + 1):
             game_map.set_floor(x, y)
         
-    def create_vertical_corridor(self, game_map: GameMap, y1, y2, x) -> None:
+    def create_vertical_corridor(self, game_map: GameMap, y1, y2, x):
         for y in range(min(y1, y2), max(y1, y2) + 1):
             game_map.set_floor(x, y)
 
-    def create_corridors(self, game_map: GameMap, rooms: list) -> None:
+    def create_corridors(self, game_map: GameMap, rooms: list):
         for i in range(len(rooms) - 1):
             
             x1, y1, w1, h1 = rooms[i]
@@ -69,7 +69,7 @@ class MapGenerator:
             self.create_horizontal_corridor(game_map, start_x, end_x, start_y)
             self.create_vertical_corridor(game_map, start_y, end_y, end_x)
         
-    def find_free_cell_in_room(self, game_map: GameMap, x, y, w, h) -> tuple | None:
+    def find_free_cell_in_room(self, game_map: GameMap, x, y, w, h):
         for _ in range(100): # максимум попыток поиска
             fx = random.randint(x, x + w - 1)
             fy = random.randint(y, y + h - 1)
@@ -77,7 +77,7 @@ class MapGenerator:
                 return (fx, fy)
         return None
     
-    def _place_objects(self, game_map: GameMap, rooms: list) -> None:
+    def _place_objects(self, game_map: GameMap, rooms: list):
         # Игрок – в первой комнате
         x1, y1, w1, h1 = rooms[0]
         player_pos = self.find_free_cell_in_room(game_map, x1, y1, w1, h1)

@@ -21,21 +21,21 @@ class GameMap:
             return self.tiles[x][y] == '.'
         return False
     
-    def place_object(self, x, y, symbol: str) -> None:
+    def place_object(self, x, y, symbol):
         if 0 <= x < self.width and 0 <= y < self.height:
             self.objects[x][y] = symbol
         
-    def remove_object(self, x, y) -> None:
+    def remove_object(self, x, y):
         if 0 <= x < self.width and 0 <= y < self.height:
             self.objects[x][y] = None
 
-    def generate_empty_map(self) -> None:
+    def generate_empty_map(self):
         for x in range(self.width):
             for y in range(self.height):
                 self.tiles[x][y] = '#'
                 self.objects[x][y] = None
     
-    def get_random_free_cell(self) -> tuple | None:
+    def get_random_free_cell(self):
         free_cells = [(x, y) for x in range(self.width) for y in range(self.height)
                       if self.is_walkable(x, y) and self.objects[x][y] is None]
         
