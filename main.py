@@ -1,8 +1,10 @@
 from core.game import Game
-from map.generator import MapGenerator
+
 
 def main():
-    gm = Game()
+    game = Game()
+    game.run()
+
 
 if __name__ == "__main__":
     main()
