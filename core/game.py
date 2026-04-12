@@ -6,6 +6,9 @@ from entities.enemy import Enemy
 from ui.renderer import Renderer 
 from core.win_conditions import WinConditions
 from ui.event_log import EventLog
+from ui.inventory import Inventory
+
+from ui.event_log import EventLog
 
 class Game:
     def __init__(self):
@@ -15,6 +18,7 @@ class Game:
         self.player = None
         self.enemies = []
         self.event_log = EventLog()
+        self.inventory = Inventory()
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
@@ -92,6 +96,7 @@ class Game:
 
             self.game_map.place_object(enemy.x, enemy.y, enemy.symbol)
 
+
             if not self.player.is_alive():
                 self.event_log.add('Игрок погиб!')
                 self.is_running = False
@@ -150,6 +155,7 @@ class Game:
                         self.config["enemies"]["goblin"]["damage"],
                         "g",
                         "Гоблин"
+                        "Гоблин"
                     )
                     goblin_instances.append(gob)
                     self.game_map.place_object(gob.x, gob.y, gob.symbol)
@@ -166,6 +172,7 @@ class Game:
                     self.config["enemies"]["troll"]["damage"],
                     "t",
                     "Тролль"
+                    "Тролль"
                 )
                 troll_instances.append(tr)
                 self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -181,6 +188,7 @@ class Game:
                         self.config["enemies"]["troll"]["hp"],
                         self.config["enemies"]["troll"]["damage"],
                         "t",
+                        "Тролль"
                         "Тролль"
                     )
                     troll_instances.append(tr)
