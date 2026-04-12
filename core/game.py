@@ -285,6 +285,8 @@ class Game:
         moved = self.player.move(dx, dy, self.game_map)
 
         if moved:
+            self.update_player_on_map(old_x, old_y)
+            self.event_log.add(f'Игрок переместился в ({self.player.x}, {self.player.y})')
             self.run_enemy_turns()
         else:
             self.event_log.add(f'Нельзя пройти сюда')
