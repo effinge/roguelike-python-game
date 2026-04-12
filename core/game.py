@@ -225,17 +225,63 @@ class Game:
         old_x = self.player.x
         old_y = self.player.y
 
-        moved = self.player.handle_input(command, self.game_map)
+        if hasattr(self.player, 'get_move_delta'):
+            dx, dy = self.player.get_move_delta(command)
+        else:
+            moved = self.player.handle_input(command, self.game_map)
+            dx = self.player.x - old_x
+            dy = self.player.y - old_y
+
+        if dx == 0 and dy == 0:
+            self.event_log.add('Неправильная команда или нет движения')
+            return
+
+        target_x = old_x + dx
+        target_y = old_y + dy
+
+        enemy = self.get_enemy_at(target_x, target_y)
+        if enemy and enemy.is_alive():
+            damage = self.player.attack(enemy)
+            self.event_log.add(f'Вы атаковали {enemy.name} и нанесли {damage} урона!')
+            if not enemy.is_alive():
+                self.event_log.add(f'{enemy.name} погиб')
+                enemy.remove_from_map(self.game_map)
+                self.enemies.remove(enemy)
+
+            self.run_enemy_turns()
+            return
+        
+        if not self.game_map.is_walkable(target_x, target_y):
+            self.event_log.add('Нельзя пройти сюда')
+            return
+
+        if 0 <= target_x < self.game_map.width and 0 <= target_y < self.game_map.height:
+            if self.game_map.objects[target_x][target_y] is not None:
+                if self.game_map.objects[target_x][target_y] == '>':
+
+                    self.player.x = target_x
+                    self.player.y = target_y
+                    self.update_player_on_map(old_x, old_y)
+                    self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
+                    if self.win_conditions.check_win():
+                        self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
+                        self.is_running = False
+                    return
+                else:
+                    self.event_log.add('Клетка занята')
+                    return
+
+        moved = self.player.move(dx, dy, self.game_map)
 
         if moved:
+            self.update_player_on_map(old_x, old_y)
+            self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
+
             self.run_enemy_turns()
-            
+
             if self.win_conditions.check_win():
                 self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
                 self.is_running = False
-            
-            self.update_player_on_map(old_x, old_y)
-            self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
         else:
             self.event_log.add(f'Нельзя пройти сюда')
     
