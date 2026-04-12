@@ -259,14 +259,17 @@ class Game:
             if self.game_map.objects[target_x][target_y] is not None:
                 if self.game_map.objects[target_x][target_y] == '>':
 
-                    self.player.x = target_x
-                    self.player.y = target_y
-                    self.update_player_on_map(old_x, old_y)
-                    self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
-                    if self.win_conditions.check_win():
+                    if self.win_conditions.check_win(target_x, target_y):
+                        
+                        self.player.x = target_x
+                        self.player.y = target_y
+                        self.update_player_on_map(old_x, old_y)
                         self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
                         self.is_running = False
-                    return
+                        return
+                    else:
+                        self.event_log.add('Клетка занята')
+                        return
                 else:
                     self.event_log.add('Клетка занята')
                     return
@@ -274,14 +277,13 @@ class Game:
         moved = self.player.move(dx, dy, self.game_map)
 
         if moved:
-            self.update_player_on_map(old_x, old_y)
+            stepped_on_exit = self.update_player_on_map(old_x, old_y)
             self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
+            if stepped_on_exit:
+                self.is_running = False
+                return
 
             self.run_enemy_turns()
-
-            if self.win_conditions.check_win():
-                self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y}) и выиграл!')
-                self.is_running = False
         else:
             self.event_log.add(f'Нельзя пройти сюда')
     
@@ -293,7 +295,4 @@ class Game:
             command = input("\nДействие: ").strip().lower()
             self.handle_input(command)
             
-            if self.win_conditions.check_win():
-                print("Вы выиграли!")
-                self.is_running = False
         print("Игра закончена.")
