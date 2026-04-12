@@ -277,16 +277,9 @@ class Game:
         moved = self.player.move(dx, dy, self.game_map)
 
         if moved:
-            stepped_on_exit = self.update_player_on_map(old_x, old_y)
-            self.event_log.add(f'Игрок перешел в ({self.player.x}, {self.player.y})')
-            if stepped_on_exit:
-                self.is_running = False
-                return
-
             self.run_enemy_turns()
         else:
             self.event_log.add(f'Нельзя пройти сюда')
-    
     
     def run(self):
         while self.is_running:
