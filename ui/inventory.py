@@ -15,13 +15,11 @@ class Inventory:
         return self.items
 
 
+import shutil
+
+
 class InventoryUI:
-    """Простейший полноэкранный консольный UI для инвентаря.
-
-    Использование: InventoryUI.open(game) — остановит основной цикл и
-    позволит игроку просматривать предметы и применять/экипировать/выбрасывать их.
-    """
-
+    
     @staticmethod
     def clear_screen():
         print('\n' * 30)
@@ -32,18 +30,30 @@ class InventoryUI:
         while True:
             InventoryUI.clear_screen()
             items = inv.get_items()
-            print('Inventory'.center(40))
-            print(f'Всего слотов {len(items)}/20')
-            print()
+
+            term = shutil.get_terminal_size((120, 30))
+            term_w, term_h = term.columns, term.lines
+            content_lines = []
+            content_lines.append('Inventory')
+            content_lines.append(f'Всего слотов {len(items)}/20')
+            content_lines.append('')
             for idx in range(10):
                 if idx < len(items):
-                    print(f'{idx+1}. {items[idx]}')
+                    content_lines.append(f'{idx+1}. {items[idx]}')
                 else:
-                    print(f'{idx+1}. -')
+                    content_lines.append(f'{idx+1}. -')
+            content_lines.append('')
+            content_lines.append('Выберите предмет (номер) или нажмите q чтобы выйти')
 
-            print()
-            print('Выберите предмет (номер) или нажмите q чтобы выйти')
-            choice = input('> ').strip().lower()
+            content_width = max(len(line) for line in content_lines) + 4
+            left_padding = ' ' * max(0, (term_w - content_width) // 2)
+            top_padding_lines = max(0, (term_h - len(content_lines)) // 3)
+
+            print('\n' * top_padding_lines)
+            for line in content_lines:
+                print(f"{left_padding}{line}")
+
+            choice = input(f"{left_padding}> ").strip().lower()
             if choice == 'q':
                 break
             if not choice.isdigit():
@@ -53,25 +63,32 @@ class InventoryUI:
                 continue
             item = items[sel]
 
-            # show details and actions
             while True:
                 InventoryUI.clear_screen()
-                print(f'Предмет: {item.name}')
-                print()
-                print(item.describe())
-                print()
-                actions = []
-                print('Доступные действия:')
-                print('u - Use (если применимо)')
-                print('e - Equip (если оружие)')
-                print('d - Drop')
-                print('b - Back')
-                act = input('> ').strip().lower()
+                detail_lines = []
+                detail_lines.append(f'Предмет: {item.name}')
+                detail_lines.append('')
+                detail_lines.extend(item.describe().split('\n'))
+                detail_lines.append('')
+                detail_lines.append('Доступные действия:')
+                detail_lines.append('u - Use (если применимо)')
+                detail_lines.append('e - Equip (если оружие)')
+                detail_lines.append('d - Drop')
+                detail_lines.append('b - Back')
+
+                term = shutil.get_terminal_size((120, 30))
+                term_w, term_h = term.columns, term.lines
+                content_w = max(len(line) for line in detail_lines) + 4
+                left_padding = ' ' * max(0, (term_w - content_w) // 2)
+                top_pad = max(0, (term_h - len(detail_lines)) // 3)
+                print('\n' * top_pad)
+                for ln in detail_lines:
+                    print(f"{left_padding}{ln}")
+                act = input(f"{left_padding}> ").strip().lower()
                 if act == 'b':
                     break
                 if act == 'd':
                     inv.remove(item)
-                    # place item on map at player's position
                     px, py = game.player.x, game.player.y
                     game.items_map[(px, py)] = item
                     game.game_map.place_object(px, py, item.symbol if getattr(item, 'symbol', None) else 'I')
@@ -90,5 +107,3 @@ class InventoryUI:
                     if msg:
                         game.event_log.add(msg)
                     break
-            # after action, return to inventory list
-        # inventory closed
