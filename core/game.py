@@ -7,7 +7,7 @@ from entities.enemy import Enemy
 from ui.renderer import Renderer 
 from core.win_conditions import WinConditions
 from ui.event_log import EventLog
-from ui.inventory import Inventory
+from ui.inventory import Inventory, InventoryUI
 from items.item import ItemFactory
 
 class Game:
@@ -58,9 +58,7 @@ class Game:
         if 0 <= tx < self.game_map.width and 0 <= ty < self.game_map.height:
             target_obj = self.game_map.objects[tx][ty]
 
-        # When player leaves the old cell, if there is an item under that cell
-        # (player previously stood on it), restore the item marker instead of
-        # leaving the cell empty.
+
         if (old_x, old_y) in getattr(self, 'items_map', {}):
             item = self.items_map[(old_x, old_y)]
             symbol = item.symbol if getattr(item, 'symbol', None) else 'I'
@@ -68,8 +66,7 @@ class Game:
         else:
             self.game_map.remove_object(old_x, old_y)
 
-        # Place player symbol on the new cell (this will temporarily hide any
-        # item that was there; item remains tracked in items_map until picked up)
+        
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
 
         return target_obj == '>'
@@ -262,6 +259,11 @@ class Game:
                 self.run_enemy_turns()
             else:
                 self.event_log.add('Здесь нет предмета')
+            return
+
+        if command == 'y':
+            # открыть полноэкранный инвентарь (игра ставится на паузу внутри UI)
+            InventoryUI.open(self)
             return
 
         old_x = self.player.x
