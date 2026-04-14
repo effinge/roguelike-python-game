@@ -2,6 +2,7 @@ from systems.combat_system import CombatSystem
 from systems.enemy_turn_system import EnemyTurnSystem
 from systems.item_system import ItemSystem
 from systems.map_sync import MapSync
+from systems.visibility_system import VisibilitySystem
 from ui.inventory import InventoryUI
 
 
@@ -110,7 +111,9 @@ class CommandHandler:
         moved = state.player.move(dx, dy, state.game_map)
         if moved:
             MapSync.move_player(state, old_x, old_y)
+            VisibilitySystem.update(state)
             state.event_log.add(f"Игрок переместился в ({state.player.x}, {state.player.y})")
             EnemyTurnSystem.run(state)
+            
         else:
             state.event_log.add("Нельзя пройти сюда")
