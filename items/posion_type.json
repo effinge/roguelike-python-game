@@ -1,0 +1,32 @@
+{
+    "healing potions": {
+        "small healing potion": {
+            "name": "Малое зелье лечения",
+            "healing_amount": 20,
+            "symbol": "p"},
+        "medium healing potion": {
+            "name": "Среднее зелье лечения",
+            "healing_amount": 50,
+            "symbol": "h"},
+        "large healing potion": {
+            "name": "Большое зелье лечения",
+            "healing_amount": 100,
+            "symbol": "H"
+        }   
+    },
+    "strength potions": {
+        "small strength potion": {
+            "name": "Малое зелье силы",
+            "attack_increase": 5,
+            "symbol": "o"},
+        "medium strength potion": {
+            "name": "Среднее зелье силы",
+            "attack_increase": 10,
+            "symbol": "s"},
+        "large strength potion": {
+            "name": "Большое зелье силы",
+            "attack_increase": 20,
+            "symbol": "S"
+        }
+    }
+}
