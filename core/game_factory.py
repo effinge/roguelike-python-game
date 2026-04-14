@@ -26,7 +26,7 @@ class GameFactory:
     def find_object(game_map, symbol):
         for x in range(game_map.width):
             for y in range(game_map.height):
-                if game_map.get_cell(x, y) == symbol:
+                if game_map.objects[x][y] == symbol:
                     return (x, y)
         return None
     
@@ -35,7 +35,7 @@ class GameFactory:
         positions = []
         for x in range(game_map.width):
             for y in range(game_map.height):
-                if game_map.get_cell(x, y) == symbol:
+                if game_map.objects[x][y] == symbol:
                     positions.append((x, y))
         return positions
     

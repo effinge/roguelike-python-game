@@ -56,7 +56,7 @@ class CommandHandler:
             key=lambda e: abs(e.x - state.player.x) + abs(e.y - state.player.y)
         )
 
-        CombatSystem.player_attack_enemy(state, target)
+        CombatSystem.player_attack(state, target)
         if state.is_running:
             EnemyTurnSystem.run(state)
 

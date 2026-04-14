@@ -11,7 +11,6 @@ class EnemyTurnSystem:
                 continue
 
             state.game_map.remove_object(enemy.x, enemy.y)
-
             result = enemy.ai_move(state.game_map, state.player)
 
             if isinstance(result, tuple) and result[0] == "attack":
