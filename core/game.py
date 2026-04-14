@@ -68,6 +68,26 @@ class Game:
                 return e
         return None
 
+    def _symbol_to_item(self, symbol):
+        all_items = ItemFactory.load_all()
+        for it in all_items.values():
+            if getattr(it, 'symbol', None) == symbol:
+                return it
+        return None
+
+    def _clone_item(self, item):
+        if item is None:
+            return None
+        cls_name = item.__class__.__name__
+        if cls_name == 'Weapon':
+            return type(item)(getattr(item, 'id', None), getattr(item, 'name', None), getattr(item, 'damage', None), getattr(item, 'symbol', None))
+        if cls_name == 'Potion':
+            return type(item)(getattr(item, 'id', None), getattr(item, 'name', None), getattr(item, 'properties', None), getattr(item, 'symbol', None))
+        try:
+            return type(item)(getattr(item, 'id', None), getattr(item, 'name', None), getattr(item, 'symbol', None), getattr(item, 'item_type', None), getattr(item, 'properties', None))
+        except Exception:
+            return item
+
     # ----------------- player/map updates -----------------
     def update_player_on_map(self, old_x, old_y):
         # remember what was on the target cell before placing the player
@@ -302,8 +322,20 @@ class Game:
                     else:
                         self.event_log.add('Клетка занята')
                         return
-                elif obj == 'I':
-                    # item cell, allow stepping on it
+                item_from_symbol = self._symbol_to_item(obj)
+                if item_from_symbol is not None or obj == 'I':
+                    # ensure items_map has an item instance at this location so pickup works
+                    if (target_x, target_y) not in self.items_map:
+                        base_item = item_from_symbol if item_from_symbol is not None else None
+                        chosen = self._clone_item(base_item) if base_item is not None else None
+                        if chosen is None:
+                            # fallback: pick any random item
+                            all_items = ItemFactory.load_all()
+                            items = list(all_items.values())
+                            chosen = self._clone_item(random.choice(items)) if items else None
+                        if chosen is not None:
+                            self.items_map[(target_x, target_y)] = chosen
+                    # allow stepping on item cell
                     pass
                 else:
                     self.event_log.add('Клетка занята')
