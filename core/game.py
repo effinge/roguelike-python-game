@@ -9,11 +9,10 @@ from core.win_conditions import WinConditions
 from ui.event_log import EventLog
 from ui.inventory import Inventory, InventoryUI
 from items.item import ItemFactory
-
 class Game:
     def __init__(self):
         self.config = self.load_config()
-        
+
         self.game_map = None
         self.player = None
         self.enemies = []
@@ -23,18 +22,36 @@ class Game:
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
-        
+
         self.setup_game()
-        
+
     def load_config(self):
-        with open("config/game_config.json", "r") as file:
+        with open("config/game_config.json", "r", encoding="utf-8") as file:
             return json.load(file)
-    
+
+
+    def _create_enemy(self, x, y, cfg_key, symbol, default_name) -> Enemy:
+        cfg = self.config.get("enemies", {}).get(cfg_key, {})
+        name = cfg.get("name", default_name)
+        hp = cfg.get("hp")
+        damage = cfg.get("damage")
+        return Enemy(x, y, hp, damage, symbol, name)
+
+    def _populate_items_map(self):
+        available_items = list(ItemFactory.load_all().values())
+        positions = self.find_objects("I")
+        if not available_items or not positions:
+            return
+        for (ix, iy) in positions:
+            chosen = random.choice(available_items)
+            self.items_map[(ix, iy)] = chosen
+
+    # ----------------- map queries -----------------
     def find_object(self, symbol):
         for x in range(self.game_map.width):
             for y in range(self.game_map.height):
                 if self.game_map.objects[x][y] == symbol:
-                    return (x,y)
+                    return (x, y)
         return None
 
     def find_objects(self, symbol):
@@ -51,179 +68,152 @@ class Game:
                 return e
         return None
 
+    # ----------------- player/map updates -----------------
     def update_player_on_map(self, old_x, old_y):
-        
+        # remember what was on the target cell before placing the player
         tx, ty = self.player.x, self.player.y
         target_obj = None
         if 0 <= tx < self.game_map.width and 0 <= ty < self.game_map.height:
             target_obj = self.game_map.objects[tx][ty]
 
-
-        if (old_x, old_y) in getattr(self, 'items_map', {}):
+        # restore item symbol on the old cell if an item exists there
+        if (old_x, old_y) in getattr(self, "items_map", {}):
             item = self.items_map[(old_x, old_y)]
-            symbol = item.symbol if getattr(item, 'symbol', None) else 'I'
+            symbol = item.symbol if getattr(item, "symbol", None) else "I"
             self.game_map.place_object(old_x, old_y, symbol)
         else:
             self.game_map.remove_object(old_x, old_y)
 
-        
+        # place player symbol on new position
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
 
-        return target_obj == '>'
-    
+        return target_obj == ">"
+
     def attack_enemy_at(self, x, y):
-        for enemy in self.enemies:
+        for enemy in list(self.enemies):
             if enemy.x == x and enemy.y == y:
                 damage = self.player.attack(enemy)
-                self.event_log.add(f'Вы атаковали {enemy.name}')
+                self.event_log.add(f'Вы атаковали {enemy.name} и нанесли {damage} урона')
                 if not enemy.is_alive():
                     self.event_log.add(f'{enemy.name} погиб')
                     enemy.remove_from_map(self.game_map)
                     self.enemies.remove(enemy)
                 return True
         return False
-    
+
+    # enemy turns 
     def run_enemy_turns(self):
         for enemy in list(self.enemies):
             if not enemy.is_alive():
                 enemy.remove_from_map(self.game_map)
-                self.enemies.remove(enemy)
+                try:
+                    self.enemies.remove(enemy)
+                except ValueError:
+                    pass
+                continue
 
+            # remove old object marker
             self.game_map.remove_object(enemy.x, enemy.y)
 
             result = enemy.ai_move(self.game_map, self.player)
 
             if isinstance(result, tuple) and result[0] == "attack":
-                damage = result[1]
                 self.event_log.add(f'Вас атакует {enemy.name}!')
 
+            # if enemy died during its action, remove it
             if not enemy.is_alive():
                 self.event_log.add(f'{enemy.name} погиб')
                 enemy.remove_from_map(self.game_map)
-                self.enemies.remove(enemy)
+                try:
+                    self.enemies.remove(enemy)
+                except ValueError:
+                    pass
+                continue
 
+            # place enemy on its (possibly new) position
             self.game_map.place_object(enemy.x, enemy.y, enemy.symbol)
-
 
             if not self.player.is_alive():
                 self.event_log.add('Игрок погиб!')
                 self.is_running = False
                 return
-    
+
+    # setup
     def setup_game(self):
         generator = MapGenerator("config/game_config.json")
         self.game_map = generator.generate()
-        
+
+        # player
         player_pos = self.find_object("@")
-        
         if player_pos is None:
             player_x = self.config["player"]["start_x"]
             player_y = self.config["player"]["start_y"]
         else:
-            player_x,player_y = player_pos
+            player_x, player_y = player_pos
             self.game_map.remove_object(player_x, player_y)
-        
+
         self.player = Player(
             player_x,
             player_y,
             self.config["player"]["hp"],
             self.config["player"]["damage"],
-            "@"
+            "@",
         )
-        
+
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
-        
-        
-        
+
+        # enemies from markers or spawn by config
+        self.enemies = []
         goblin_positions = self.find_objects("g")
-        goblin_instances = []
         if goblin_positions:
             for x, y in goblin_positions:
                 self.game_map.remove_object(x, y)
-                gob = Enemy(
-                    x,
-                    y,
-                    self.config["enemies"]["goblin"]["hp"],
-                    self.config["enemies"]["goblin"]["damage"],
-                    "g",
-                    "goblin"
-                )
-                goblin_instances.append(gob)
+                gob = self._create_enemy(x, y, "goblin", "g", "goblin")
+                self.enemies.append(gob)
                 self.game_map.place_object(gob.x, gob.y, gob.symbol)
         else:
-            count = self.config.get("generation", {}).get("num_goblins", 1)
+            count = self.config.get("generation", {}).get("num_goblins", 0)
             for _ in range(count):
-                pos = self.game_map.get_random_free_cell()
-                if pos:
-                    x, y = pos
-                    gob = Enemy(
-                        x,
-                        y,
-                        self.config["enemies"]["goblin"]["hp"],
-                        self.config["enemies"]["goblin"]["damage"],
-                        "g",
-                        "Гоблин"
-                        "Гоблин"
-                    )
-                    goblin_instances.append(gob)
+                cell = self.game_map.get_random_free_cell()
+                if cell:
+                    x, y = cell
+                    gob = self._create_enemy(x, y, "goblin", "g", "goblin")
+                    self.enemies.append(gob)
                     self.game_map.place_object(gob.x, gob.y, gob.symbol)
 
         troll_positions = self.find_objects("t")
-        troll_instances = []
         if troll_positions:
-            for tx, ty in troll_positions:
-                self.game_map.remove_object(tx, ty)
-                tr = Enemy(
-                    tx,
-                    ty,
-                    self.config["enemies"]["troll"]["hp"],
-                    self.config["enemies"]["troll"]["damage"],
-                    "t",
-                    "Тролль"
-                    "Тролль"
-                )
-                troll_instances.append(tr)
+            for x, y in troll_positions:
+                self.game_map.remove_object(x, y)
+                tr = self._create_enemy(x, y, "troll", "t", "troll")
+                self.enemies.append(tr)
                 self.game_map.place_object(tr.x, tr.y, tr.symbol)
         else:
             count = self.config.get("generation", {}).get("num_trolls", 0)
             for _ in range(count):
-                pos = self.game_map.get_random_free_cell()
-                if pos:
-                    tx, ty = pos
-                    tr = Enemy(
-                        tx,
-                        ty,
-                        self.config["enemies"]["troll"]["hp"],
-                        self.config["enemies"]["troll"]["damage"],
-                        "t",
-                        "Тролль"
-                        "Тролль"
-                    )
-                    troll_instances.append(tr)
+                cell = self.game_map.get_random_free_cell()
+                if cell:
+                    x, y = cell
+                    tr = self._create_enemy(x, y, "troll", "t", "troll")
+                    self.enemies.append(tr)
                     self.game_map.place_object(tr.x, tr.y, tr.symbol)
-        
-        self.enemies.extend(goblin_instances)
-        self.enemies.extend(troll_instances)
-        
-        self.g_enemy = goblin_instances[0] if goblin_instances else None
-        self.t_enemy = troll_instances[0] if troll_instances else None
 
-        available_items = list(ItemFactory.load_all().values())
-        item_positions = self.find_objects('I')
-        if available_items and item_positions:
-            for ix, iy in item_positions:
-                chosen = random.choice(available_items)
-                self.items_map[(ix, iy)] = chosen
-        
-        
+        # populate items map for any 'I' markers
+        self._populate_items_map()
 
+    # input handling 
     def handle_input(self, command):
+        if not command:
+            return
+
+        command = command.strip().lower()
+
         if command == "q":
             self.is_running = False
             return
-    
-        if command == 'f':
-            
+
+        if command == "f":
+            # attack adjacent enemy
             adj_enemies = [e for e in self.enemies if e.is_alive() and abs(e.x - self.player.x) <= 1 and abs(e.y - self.player.y) <= 1]
             if not adj_enemies:
                 self.event_log.add('Врага рядом нет')
@@ -237,8 +227,10 @@ class Game:
                 if not target.is_alive():
                     self.event_log.add(f'{target.name} погиб')
                     target.remove_from_map(self.game_map)
-                    
-                    self.enemies.remove(target)
+                    try:
+                        self.enemies.remove(target)
+                    except ValueError:
+                        pass
             else:
                 self.event_log.add('Атака не удалась')
 
@@ -251,30 +243,22 @@ class Game:
             if item:
                 self.inventory.add(item)
                 self.game_map.remove_object(pos[0], pos[1])
-
-
                 del self.items_map[pos]
                 self.event_log.add(f'Вы подобрали {item.name}')
-                
                 self.run_enemy_turns()
             else:
                 self.event_log.add('Здесь нет предмета')
             return
 
         if command == 'y':
-            # открыть полноэкранный инвентарь (игра ставится на паузу внутри UI)
             InventoryUI.open(self)
             return
 
+        # movement
         old_x = self.player.x
         old_y = self.player.y
 
-        if hasattr(self.player, 'get_move_delta'):
-            dx, dy = self.player.get_move_delta(command)
-        else:
-            moved = self.player.handle_input(command, self.game_map)
-            dx = self.player.x - old_x
-            dy = self.player.y - old_y
+        dx, dy = self.player.get_move_delta(command) if hasattr(self.player, 'get_move_delta') else (0, 0)
 
         if dx == 0 and dy == 0:
             self.event_log.add('Неправильная команда или нет движения')
@@ -290,22 +274,25 @@ class Game:
             if not enemy.is_alive():
                 self.event_log.add(f'{enemy.name} погиб')
                 enemy.remove_from_map(self.game_map)
-                self.enemies.remove(enemy)
+                try:
+                    self.enemies.remove(enemy)
+                except ValueError:
+                    pass
 
             self.run_enemy_turns()
             return
-        
+
         if not self.game_map.is_walkable(target_x, target_y):
             self.event_log.add('Нельзя пройти сюда')
             return
 
+        # check objects on target cell
         if 0 <= target_x < self.game_map.width and 0 <= target_y < self.game_map.height:
             obj = self.game_map.objects[target_x][target_y]
             if obj is not None:
                 if obj == '>':
-
+                    # check win without overwriting the exit
                     if self.win_conditions.check_win(target_x, target_y):
-                        
                         self.player.x = target_x
                         self.player.y = target_y
                         self.update_player_on_map(old_x, old_y)
@@ -316,6 +303,7 @@ class Game:
                         self.event_log.add('Клетка занята')
                         return
                 elif obj == 'I':
+                    # item cell, allow stepping on it
                     pass
                 else:
                     self.event_log.add('Клетка занята')
@@ -328,13 +316,13 @@ class Game:
             self.event_log.add(f'Игрок переместился в ({self.player.x}, {self.player.y})')
             self.run_enemy_turns()
         else:
-            self.event_log.add(f'Нельзя пройти сюда')
-    
+            self.event_log.add('Нельзя пройти сюда')
+
     def run(self):
         while self.is_running:
             self.renderer.draw(self)
-            
+
             command = input("\nДействие: ").strip().lower()
             self.handle_input(command)
-            
+
         print("Игра закончена.")
