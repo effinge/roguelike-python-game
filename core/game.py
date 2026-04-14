@@ -1,4 +1,5 @@
 import json
+import random
 
 from map.generator import MapGenerator
 from entities.player import Player
@@ -6,9 +7,8 @@ from entities.enemy import Enemy
 from ui.renderer import Renderer 
 from core.win_conditions import WinConditions
 from ui.event_log import EventLog
-from ui.inventory import Inventory
-
-from ui.event_log import EventLog
+from ui.inventory import Inventory, InventoryUI
+from items.item import ItemFactory
 
 class Game:
     def __init__(self):
@@ -19,6 +19,7 @@ class Game:
         self.enemies = []
         self.event_log = EventLog()
         self.inventory = Inventory()
+        self.items_map = {}
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
@@ -57,8 +58,15 @@ class Game:
         if 0 <= tx < self.game_map.width and 0 <= ty < self.game_map.height:
             target_obj = self.game_map.objects[tx][ty]
 
-        self.game_map.remove_object(old_x, old_y)
 
+        if (old_x, old_y) in getattr(self, 'items_map', {}):
+            item = self.items_map[(old_x, old_y)]
+            symbol = item.symbol if getattr(item, 'symbol', None) else 'I'
+            self.game_map.place_object(old_x, old_y, symbol)
+        else:
+            self.game_map.remove_object(old_x, old_y)
+
+        
         self.game_map.place_object(self.player.x, self.player.y, self.player.symbol)
 
         return target_obj == '>'
@@ -67,7 +75,7 @@ class Game:
         for enemy in self.enemies:
             if enemy.x == x and enemy.y == y:
                 damage = self.player.attack(enemy)
-                self.event_log.add(f'Вы атаковали {enemy.name} и нанесли {damage} урона!')
+                self.event_log.add(f'Вы атаковали {enemy.name}')
                 if not enemy.is_alive():
                     self.event_log.add(f'{enemy.name} погиб')
                     enemy.remove_from_map(self.game_map)
@@ -87,7 +95,7 @@ class Game:
 
             if isinstance(result, tuple) and result[0] == "attack":
                 damage = result[1]
-                self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
+                self.event_log.add(f'Вас атакует {enemy.name}!')
 
             if not enemy.is_alive():
                 self.event_log.add(f'{enemy.name} погиб')
@@ -172,7 +180,6 @@ class Game:
                     self.config["enemies"]["troll"]["damage"],
                     "t",
                     "Тролль"
-                    "Тролль"
                 )
                 troll_instances.append(tr)
                 self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -189,7 +196,6 @@ class Game:
                         self.config["enemies"]["troll"]["damage"],
                         "t",
                         "Тролль"
-                        "Тролль"
                     )
                     troll_instances.append(tr)
                     self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -199,6 +205,13 @@ class Game:
         
         self.g_enemy = goblin_instances[0] if goblin_instances else None
         self.t_enemy = troll_instances[0] if troll_instances else None
+
+        available_items = list(ItemFactory.load_all().values())
+        item_positions = self.find_objects('I')
+        if available_items and item_positions:
+            for ix, iy in item_positions:
+                chosen = random.choice(available_items)
+                self.items_map[(ix, iy)] = chosen
         
         
 
@@ -228,6 +241,27 @@ class Game:
                 self.event_log.add('Атака не удалась')
 
             self.run_enemy_turns()
+            return
+
+        if command == 'e':
+            pos = (self.player.x, self.player.y)
+            item = self.items_map.get(pos)
+            if item:
+                self.inventory.add(item)
+                self.game_map.remove_object(pos[0], pos[1])
+
+
+                del self.items_map[pos]
+                self.event_log.add(f'Вы подобрали {item.name}')
+                
+                self.run_enemy_turns()
+            else:
+                self.event_log.add('Здесь нет предмета')
+            return
+
+        if command == 'y':
+            # открыть полноэкранный инвентарь (игра ставится на паузу внутри UI)
+            InventoryUI.open(self)
             return
 
         old_x = self.player.x
@@ -264,8 +298,9 @@ class Game:
             return
 
         if 0 <= target_x < self.game_map.width and 0 <= target_y < self.game_map.height:
-            if self.game_map.objects[target_x][target_y] is not None:
-                if self.game_map.objects[target_x][target_y] == '>':
+            obj = self.game_map.objects[target_x][target_y]
+            if obj is not None:
+                if obj == '>':
 
                     if self.win_conditions.check_win(target_x, target_y):
                         
@@ -278,6 +313,8 @@ class Game:
                     else:
                         self.event_log.add('Клетка занята')
                         return
+                elif obj == 'I':
+                    pass
                 else:
                     self.event_log.add('Клетка занята')
                     return

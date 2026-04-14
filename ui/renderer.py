@@ -94,6 +94,8 @@ class Renderer:
                 "controls:".center(self.SIDEBAR_WIDTH),
                 "",
                 self.fit_line("w/a/s/d - move"),
+                self.fit_line("y - inventory"),
+                self.fit_line("e - equip item"),
                 self.fit_line("f - attack"),
                 self.fit_line("q - quit"),
             ]
