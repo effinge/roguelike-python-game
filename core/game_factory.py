@@ -125,3 +125,33 @@ class GameFactory:
         state.win_conditions = WinConditions(state)
         VisibilitySystem.update(state)
         return state
+    
+    @staticmethod
+    def create_enemy(config, x, y, cfg_key, symbol, default_name):
+        cfg = config.get("enemies", {}).get(cfg_key, {})
+        name = cfg.get("name", default_name)
+        hp = cfg.get("hp")
+        damage = cfg.get("damage")
+
+        vision_cfg = config.get("vision", {})
+
+        if cfg_key == "goblin":
+            vision_radius = vision_cfg.get("goblin_radius", 5)
+            ai_type = "goblin"
+        elif cfg_key == "troll":
+            vision_radius = vision_cfg.get("troll_radius", 7)
+            ai_type = "troll"
+        else:
+            vision_radius = vision_cfg.get("enemy_radius", 6)
+            ai_type = "default"
+
+        return Enemy(
+            x,
+            y,
+            hp,
+            damage,
+            symbol,
+            name,
+            vision_radius,
+            ai_type,
+        )

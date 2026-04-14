@@ -74,7 +74,7 @@ class CommandHandler:
 
         enemy = CombatSystem.get_enemy_at(state, target_x, target_y)
         if enemy and enemy.is_alive():
-            CombatSystem.player_attack_enemy(state, enemy)
+            CombatSystem.player_attack(state, enemy)
             if state.is_running:
                 EnemyTurnSystem.run(state)
             return

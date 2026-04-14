@@ -28,5 +28,10 @@
             "damage": 10,
             "symbol": "t"
         }
+    },
+    "vision": {
+        "goblin_radius": 5,
+        "troll_radius": 7,
+        "player_radius": 6
     }
 }
