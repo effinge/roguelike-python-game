@@ -75,7 +75,7 @@ class Game:
         for enemy in self.enemies:
             if enemy.x == x and enemy.y == y:
                 damage = self.player.attack(enemy)
-                self.event_log.add(f'Вы атаковали {enemy.name} и нанесли {damage} урона!')
+                self.event_log.add(f'Вы атаковали {enemy.name}')
                 if not enemy.is_alive():
                     self.event_log.add(f'{enemy.name} погиб')
                     enemy.remove_from_map(self.game_map)
@@ -95,7 +95,7 @@ class Game:
 
             if isinstance(result, tuple) and result[0] == "attack":
                 damage = result[1]
-                self.event_log.add(f'Вас атакует {enemy.name} и наносит {damage} урона!')
+                self.event_log.add(f'Вас атакует {enemy.name}!')
 
             if not enemy.is_alive():
                 self.event_log.add(f'{enemy.name} погиб')
@@ -180,7 +180,6 @@ class Game:
                     self.config["enemies"]["troll"]["damage"],
                     "t",
                     "Тролль"
-                    "Тролль"
                 )
                 troll_instances.append(tr)
                 self.game_map.place_object(tr.x, tr.y, tr.symbol)
@@ -196,7 +195,6 @@ class Game:
                         self.config["enemies"]["troll"]["hp"],
                         self.config["enemies"]["troll"]["damage"],
                         "t",
-                        "Тролль"
                         "Тролль"
                     )
                     troll_instances.append(tr)
