@@ -10,16 +10,23 @@ class Renderer:
     def clear_screen(self):
         print("\n" * 30)
 
-    def get_map_lines(self, game):
+    def get_map_lines(self, state):
         lines = []
 
-        for y in range(game.game_map.height):
+        for y in range(state.game_map.height):
             row = ""
 
-            for x in range(game.game_map.width):
-                tile_symbol = game.game_map.tiles[x][y]
-                object_symbol = game.game_map.objects[x][y]
-                row += object_symbol if object_symbol is not None else tile_symbol
+            for x in range(state.game_map.width):
+                pos = (x, y)
+                tile_symbol = state.game_map.tiles[x][y]
+                object_symbol = state.game_map.objects[x][y]
+
+                if pos in state.visible_tiles:
+                    row += object_symbol if object_symbol is not None else tile_symbol
+                elif pos in state.explored_tiles:
+                    row += tile_symbol
+                else:
+                    row += " "
 
             lines.append(row)
 

@@ -43,8 +43,6 @@ class Player(Entity):
     def attack_target(self, target):
         if abs(self.x - target.x) <= 1 and abs(self.y - target.y) <= 1:
             damage = self.attack(target)
-            print(f"Вы атакуете {target.name} и наносите {damage} урона!")
             return True
         else:
-            print("Враг слишком далеко!")
             return False

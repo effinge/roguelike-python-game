@@ -4,6 +4,7 @@ class Inventory:
 
     def add(self, item):
         self.items.append(item)
+        return True
 
     def remove(self, item):
         if item in self.items:

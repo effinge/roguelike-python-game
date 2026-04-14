@@ -12,10 +12,10 @@
     "generation": {
         "num_rooms": 10,
         "room_min_size": 10,
-        "room_max_size": 15,
-        "num_trolls": 1,
-        "num_goblins": 1,
-        "num_items": 2
+        "room_max_size": 20,
+        "num_trolls": 10,
+        "num_goblins": 10,
+        "num_items": 20
     },
     "enemies": {
         "goblin": {
@@ -28,5 +28,10 @@
             "damage": 10,
             "symbol": "t"
         }
+    },
+    "vision": {
+        "goblin_radius": 5,
+        "troll_radius": 7,
+        "player_radius": 6
     }
 }
