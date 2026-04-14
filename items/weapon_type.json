@@ -1,0 +1,14 @@
+{   
+    "dagger": {
+        "name": "Кинжал",
+        "damage": 5
+    },
+    "sword": {
+        "name": "Меч",
+        "damage": 10
+    },
+    "axe": {
+        "name": "Топор",
+        "damage": 15
+    }
+}
