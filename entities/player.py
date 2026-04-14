@@ -19,6 +19,13 @@ class Player(Entity):
     
 
     def handle_input(self, key, game_map):
+        dx, dy = self.get_move_delta(key)
+        if dx == 0 and dy == 0:
+            return False
+
+        return self.move(dx, dy, game_map)
+
+    def get_move_delta(self, key):
         dx, dy = 0, 0
         k = key.lower()
 
@@ -30,10 +37,8 @@ class Player(Entity):
             dx = -1
         elif k in ['d', 'в']:
             dx = 1
-        else:
-            return False
 
-        return self.move(dx, dy, game_map)
+        return dx, dy
 
     def attack_target(self, target):
         if abs(self.x - target.x) <= 1 and abs(self.y - target.y) <= 1:
