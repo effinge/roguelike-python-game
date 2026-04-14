@@ -1,7 +1,7 @@
 {
     "map": {
-        "width": 20,
-        "height": 10
+        "width": 70,
+        "height": 40
     },
     "player": {
         "hp": 100,
@@ -10,12 +10,12 @@
         "start_y": 2
     },
     "generation": {
-        "num_rooms": 5,
-        "room_min_size": 3,
-        "room_max_size": 6,
-        "num_trolls": 1,
-        "num_goblins": 1,
-        "num_items": 2
+        "num_rooms": 10,
+        "room_min_size": 10,
+        "room_max_size": 20,
+        "num_trolls": 10,
+        "num_goblins": 10,
+        "num_items": 20
     },
     "enemies": {
         "goblin": {

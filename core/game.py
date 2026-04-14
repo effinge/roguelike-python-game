@@ -1,5 +1,10 @@
 import json
 import random
+import sys
+import tty
+import termios
+import select
+import time
 
 from map.generator import MapGenerator
 from entities.player import Player
@@ -22,6 +27,8 @@ class Game:
         self.renderer = Renderer()
         self.is_running = True
         self.win_conditions = WinConditions(self)
+
+        self.tick = float(self.config.get('tick', 0.5))
 
         self.setup_game()
 
@@ -271,7 +278,11 @@ class Game:
             return
 
         if command == 'y':
-            InventoryUI.open(self)
+            self._restore_terminal()
+            try:
+                InventoryUI.open(self)
+            finally:
+                self._enable_cbreak()
             return
 
         # movement
@@ -351,10 +362,44 @@ class Game:
             self.event_log.add('Нельзя пройти сюда')
 
     def run(self):
-        while self.is_running:
-            self.renderer.draw(self)
+        try:
+            self._enable_cbreak()
+            while self.is_running:
+                self.renderer.draw(self)
 
-            command = input("\nДействие: ").strip().lower()
-            self.handle_input(command)
+                r, _, _ = select.select([sys.stdin], [], [], self.tick)
+                if r:
+                    ch = sys.stdin.read(1)
+                    if not ch:
+                        continue
+                    if ch == '\x03':
+                        break
+                    if ch == '\x1b':
+                        if select.select([sys.stdin], [], [], 0.01)[0]:
+                            _ = sys.stdin.read(1)
+                        if select.select([sys.stdin], [], [], 0.01)[0]:
+                            _ = sys.stdin.read(1)
+                        continue
+                    self.handle_input(ch)
+                else:
+                    self.run_enemy_turns()
+        finally:
+            self._restore_terminal()
+            print("Игра закончена.")
 
-        print("Игра закончена.")
+    # terminal helpers 
+    def _enable_cbreak(self):
+        try:
+            if hasattr(sys.stdin, 'fileno'):
+                self._orig_term_settings = termios.tcgetattr(sys.stdin)
+                tty.setcbreak(sys.stdin.fileno())
+        except Exception:
+            self._orig_term_settings = None
+
+    def _restore_terminal(self):
+        try:
+            if getattr(self, '_orig_term_settings', None):
+                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self._orig_term_settings)
+                self._orig_term_settings = None
+        except Exception:
+            pass
