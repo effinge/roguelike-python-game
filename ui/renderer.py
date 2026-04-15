@@ -1,14 +1,43 @@
+import os
 import shutil
+import sys
 
 
 class Renderer:
-    SIDEBAR_WIDTH = 30
+    SIDEBAR_WIDTH = 50
     SIDEBAR_GAP = 4
     LOG_LINES = 3
     INVENTORY_LINES = 3
 
+    def __init__(self):
+        self._supports_ansi = self._detect_ansi_support()
+
+    def _detect_ansi_support(self):
+        if sys.platform != "win32":
+            return True
+
+        try:
+            import ctypes
+
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.GetStdHandle(-11)
+            mode = ctypes.c_uint()
+
+            if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+                return False
+
+            enable_virtual_terminal_processing = 0x0004
+            new_mode = mode.value | enable_virtual_terminal_processing
+            return bool(kernel32.SetConsoleMode(handle, new_mode))
+        except Exception:
+            return False
+
     def clear_screen(self):
-        print("\n" * 30)
+        if self._supports_ansi:
+            sys.stdout.write("\x1b[2J\x1b[H")
+            return
+
+        os.system("cls" if sys.platform == "win32" else "clear")
 
     def get_map_lines(self, state):
         lines = []
@@ -123,9 +152,16 @@ class Renderer:
         map_top_padding = max(0, map_center_anchor - len(map_lines) // 2)
         total_lines = max(len(sidebar_lines), map_top_padding + len(map_lines))
 
+        frame_lines = []
+
         for i in range(total_lines):
             map_index = i - map_top_padding
             map_line = map_lines[map_index] if 0 <= map_index < len(map_lines) else ""
             sidebar_line = sidebar_lines[i] if i < len(sidebar_lines) else ""
-            print(f"{left_padding}{map_line.ljust(map_width + self.SIDEBAR_GAP)}{sidebar_line}")
-        print(f"{left_padding}Coords: ({game.player.x}, {game.player.y})")
+            frame_lines.append(
+                f"{left_padding}{map_line.ljust(map_width + self.SIDEBAR_GAP)}{sidebar_line}"
+            )
+
+        frame_lines.append(f"{left_padding}Coords: ({game.player.x}, {game.player.y})")
+        sys.stdout.write("\n".join(frame_lines) + "\n")
+        sys.stdout.flush()
