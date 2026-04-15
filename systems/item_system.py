@@ -34,16 +34,8 @@ class ItemSystem:
                 getattr(item, "symbol", None),
             )
 
-        try:
-            return type(item)(
-                getattr(item, "id", None),
-                getattr(item, "name", None),
-                getattr(item, "symbol", None),
-                getattr(item, "item_type", None),
-                getattr(item, "properties", None),
-            )
-        except Exception:
-            return item
+        
+        return item
 
     @staticmethod
     def ensure_item_on_position(state, x, y, obj_symbol):
@@ -52,11 +44,6 @@ class ItemSystem:
 
         item_from_symbol = ItemSystem.symbol_to_item(obj_symbol)
         chosen = ItemSystem.clone_item(item_from_symbol)
-
-        if chosen is None:
-            all_items = list(ItemFactory.load_all().values())
-            if all_items:
-                chosen = ItemSystem.clone_item(random.choice(all_items))
 
         if chosen is not None:
             state.items_map[(x, y)] = chosen
@@ -67,6 +54,12 @@ class ItemSystem:
         item = state.items_map.get(pos)
 
         if item is None:
+            obj_symbol = state.game_map.objects[pos[0]][pos[1]]
+            if obj_symbol is not None:
+                ItemSystem.ensure_item_on_position(state, pos[0], pos[1], obj_symbol)
+                item = state.items_map.get(pos)
+
+        if item is None:
             state.event_log.add("Здесь нет предмета")
             return False
 
@@ -75,7 +68,7 @@ class ItemSystem:
             state.event_log.add("Инвентарь заполнен")
             return False
 
-        state.game_map.remove_object(pos[0], pos[1])
         del state.items_map[pos]
+        
         state.event_log.add(f"Вы подобрали {item.name}")
         return True
