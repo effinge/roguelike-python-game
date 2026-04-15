@@ -3,7 +3,7 @@ from .entity import Entity
 
 class Enemy(Entity):
 
-    def __init__(self, x, y, hp, damage, symbol, name, vision_radius, ai_type):
+    def __init__(self, x, y, hp, damage, symbol, name, vision_radius=6, ai_type="default"):
         super().__init__(x, y, hp, damage, symbol)
         self.name = name
         self.vision_radius = vision_radius
