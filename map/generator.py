@@ -24,7 +24,7 @@ class MapGenerator:
             for j in range(y, y + h):
                 game_map.set_floor(i, j)
 
-    def rectangles_intersect(self, r1: tuple, r2: tuple) -> None:
+    def rectangles_intersect(self, r1: tuple, r2: tuple):
         x1, y1, w1, h1 = r1
         x2, y2, w2, h2 = r2
         return not(x1 + w1 < x2 or x2 + w2 < x1 or y1 + h1 < y2 or y2 + h2 < y1)
